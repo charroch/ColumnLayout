@@ -23,4 +23,4 @@ local.properties
 *.apk
 bin
 target
-
+**/target/
