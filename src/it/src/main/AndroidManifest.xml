@@ -11,6 +11,6 @@
     </application>
     <instrumentation
             android:label="Tests" android:targetPackage="novoda.widget"
-            android:name="novoda.widget.tests.Runner">
+            android:name="android.test.InstrumentationTestRunner">
     </instrumentation>
 </manifest>

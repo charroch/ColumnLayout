@@ -34,12 +34,7 @@ object AndroidBuild extends Build {
     "tests",
     file("src/it"),
     settings = General.settings ++ AndroidTest.androidSettings ++ Seq(
-      libraryDependencies += "org.specs2" %% "specs2" % "1.7.1",
       useProguard in Android := false,
-      dxInputs in Android ++= Seq(
-        file("/home/acsia/.ivy2/cache/org.specs2/specs2_2.9.1/jars/specs2_2.9.1-1.7.1.jar"),
-        file("/home/acsia/.ivy2/cache/org.specs2/specs2-scalaz-core_2.9.1/jars/specs2-scalaz-core_2.9.1-6.0.1.jar")
-      ),
       name := "ColumnLayoutTests"
     )
   ) dependsOn main
