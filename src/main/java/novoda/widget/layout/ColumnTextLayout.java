@@ -4,53 +4,80 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.Layout.Alignment;
+import android.util.Log;
+
+import java.util.*;
 
 public class ColumnTextLayout {
-    public int charStart;
 
-    public int charEnd;
-
-    public int lineStart;
-
-    public int lineEnd;
-
+    /**
+     * Original text for all the columns.
+     */
     private final CharSequence text;
 
+    /**
+     * Same paint will be used for all columns
+     */
     private final TextPaint textPaint;
 
-    public ColumnTextLayout() {
-        text = null;
-        textPaint = null;
-    }
+    Stack<Column> columns;
 
     public ColumnTextLayout(CharSequence text, TextPaint textPaint) {
         this.text = text;
         this.textPaint = textPaint;
+        columns = new Stack<Column>();
+    }
+
+    public CharSequence getText() {
+        return text;
     }
 
     public Column next(int width, int height) {
-        Layout layout = getLayout(width);
-        int firstNextLine = layout.getLineForVertical(height);
-        int lastLine = firstNextLine - 1;
-        int end = layout.getLineEnd(lastLine);
-        StaticLayout columnLayout = new StaticLayout(text.subSequence(0, end), textPaint, width,
+        int firstCharPosition = getFirstChar();
+        int lastLine = getLastLine(width, height);
+        int nbChar = getLastChar(lastLine, width);
+
+        Log.i("TEST", "->" + firstCharPosition + " " + lastLine + " " + nbChar);
+        StaticLayout columnLayout = new StaticLayout(
+                text.subSequence(firstCharPosition, firstCharPosition + nbChar),
+                textPaint,
+                width,
                 Alignment.ALIGN_NORMAL, 1, 1, true);
-        Column column = new Column(columnLayout);
+
+        Column column = new Column(columnLayout, firstCharPosition);
+        columns.push(column);
         return column;
     }
 
-    private StaticLayout getLayout(int width) {
-        return new StaticLayout(text, textPaint, width, Alignment.ALIGN_NORMAL, 1,
+    private int getLastChar(int lastLine, int width) {
+        if (columns.isEmpty()) {
+            return getLayout(0, width).getLineEnd(lastLine);
+        } else {
+            int lastChar = columns.peek().getLastCharPosition();
+            return getLayout(lastChar, width).getLineEnd(lastLine);
+        }
+    }
+
+    private int getLastLine(int width, int height) {
+        if (columns.isEmpty()) {
+            return getLayout(0, width).getLineForVertical(height);
+        } else {
+            int lastChar = columns.peek().getLastCharPosition();
+            return getLayout(lastChar, width).getLineForVertical(height);
+        }
+    }
+
+    private int getFirstChar() {
+        if (columns.isEmpty()) {
+            return 0;
+        } else {
+            return columns.peek().getLastCharPosition();
+        }
+    }
+
+    private StaticLayout getLayout(int fromChar, int width) {
+        return new StaticLayout(
+                text.subSequence(fromChar, text.length()), textPaint, width, Alignment.ALIGN_NORMAL, 1,
                 1, true);
-    }
-
-    public int getColumnCount(int width, int height) {
-        return (int) Math.ceil(getLayout(width).getHeight() / height);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("first char: %s, for line: %s, last char: %s, for line: %s",
-                charStart, lineStart, charEnd, lineEnd);
     }
 }

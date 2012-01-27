@@ -1,13 +1,13 @@
 package novoda.widget.tests
 
 import _root_.android.test.AndroidTestCase
-import novoda.widget.layout.ColumnTextLayout
 import android.text._
 
 import style.TypefaceSpan
 import android.graphics.{Typeface, Paint}
 import junit.framework.Assert._
 import android.util.Log
+import novoda.widget.layout.ColumnTextLayout
 
 class UnitTests extends AndroidTestCase {
 
@@ -31,40 +31,69 @@ class UnitTests extends AndroidTestCase {
   }
 
   def testSingleLineLayout {
-    //    val (s, ll, nbLine) = compute(column);
-    //    val c = column.next(ll.toInt, 250);
-    //    assertEquals(2, c.getLineCount());
+    val simpleText = """aaa
+                       |aaa""".stripMargin
+
+    val column = new ColumnTextLayout(simpleText, p).next(Integer.MAX_VALUE, Integer.MAX_VALUE);
+    val tl = new StaticLayout(simpleText, p, Integer.MAX_VALUE, Layout.Alignment.ALIGN_NORMAL, 1.0f, 1.0f, true);
+    assertEquals(1, tl.getLineForVertical(Integer.MAX_VALUE));
+    assertEquals(2, tl.getLineCount);
+    assertEquals(tl.getText, simpleText);
+    assertEquals(simpleText.length(), tl.getText.length());
+    assertEquals(2, column.getLineCount);
+    assertEquals(7, column.getText().length());
+    assertEquals(7, column.getLastCharPosition());
   }
 
   def testMultiLineLayout {
     given(
       """
-      |aaaaaa
-      |aaaaaa
+      |aooooo
+      |oooooa
       |
-      |aaaaaaaaaaa
-      |aaaaaaaaaaa
-      |aaaaaaaaaaa
-      |aaaaaaaaaaa
+      |boooooooooo
+      |ooooooooooo
+      |ooooooooooo
+      |oooooooooob
       |
-      |aa
-      |aa
-      |aa
-      """
+      |co
+      |oo
+      |oc
+      """.stripMargin.trim.replace("\n", "")
     ) {
       (c: ColumnTextLayout, singleCharacterWidth: Int, lineHeight: Int) =>
 
-        assertEquals("A 5x2 column with single char lenght " + singleCharacterWidth + " and lineHeight " + lineHeight,
-          c.next(5 * singleCharacterWidth, 20).getLineCount, 2)
+        Log.i("TEST", "::: " + c.getText());
 
-        assertEquals(c.next(11 * singleCharacterWidth, 4 * lineHeight).getLineCount, 4)
-        assertEquals(c.next(2 * singleCharacterWidth, 3 * lineHeight).getLineCount, 3)
-      //c.hasNext false
+        val column = c.next(6 * singleCharacterWidth, (lineHeight * 2));
+        val t = column.getText();
+        assertEquals("should be " + t, 'a', t.charAt(0));
+        assertEquals("should be " + t, 'a', t.charAt(t.length() - 1));
+        assertEquals("A 5x2 column with single char lenght " + singleCharacterWidth + " and lineHeight " + lineHeight,
+          column.getLineCount, 2)
+
+        val b = c.next(11 * singleCharacterWidth, (lineHeight * 4));
+        val tb = b.getText();
+        assertEquals("should be " + tb, 'b', tb.charAt(0));
+        assertEquals("should be " + tb, 'b', tb.charAt(tb.length() - 1));
+        assertEquals(b.getLineCount, 4)
+
+        val cc = c.next(2 * singleCharacterWidth, (lineHeight * 3));
+        val tc = cc.getText();
+        assertEquals("should be " + tc, 'c', tc.charAt(0));
+        assertEquals("should be " + tc, 'c', tc.charAt(tc.length() - 1));
+        assertEquals(cc.getLineCount, 3)
     }
   }
 
-
   val column = "aaaa\naaaa"
+
+  implicit val p = {
+    val paint = new Paint();
+    paint.setAntiAlias(true);
+    paint.setTypeface(Typeface.MONOSPACE);
+    new TextPaint(paint);
+  }
 
   def compute(s: String) = {
 
@@ -73,19 +102,14 @@ class UnitTests extends AndroidTestCase {
     paint.setTypeface(Typeface.MONOSPACE);
     val p = new TextPaint(paint);
 
+    val unixHeight = -1 * (p.getFontMetricsInt.top + p.getFontMetrics.bottom)
+    val unixAD = -1 * (p.getFontMetricsInt.ascent + p.getFontMetricsInt.descent)
+
     val span = new SpannableStringBuilder(s.substring(0, 1));
-
-
     val height = new StaticLayout(span, p, 100, Layout.Alignment.ALIGN_NORMAL, 1.0f, 1.0f, true).getHeight
-
     val span2 = new SpannableStringBuilder("a");
     val desiredWidth = Layout.getDesiredWidth(span2, p)
-
-    Log.i("TEST", " ================ > " +desiredWidth);
-    //    val nbLine = s.split('\n').length
-    //    val lineLength = s.split('\n')(0).length() * dw
-    //    (s.filter(_ != '\n'), lineLength, nbLine)
-    (desiredWidth, height)
+    (scala.math.ceil(desiredWidth), scala.math.ceil(p.getFontSpacing))
   }
 
   implicit def string2charSequence(s: String): ColumnTextLayout = {
