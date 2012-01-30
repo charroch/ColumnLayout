@@ -1,12 +1,10 @@
 package novoda.widget.layout;
 
-import android.text.Layout;
+import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.text.Layout.Alignment;
-import android.util.Log;
 
-import java.util.*;
+import java.util.Stack;
 
 public class ColumnTextLayout {
 
@@ -36,8 +34,6 @@ public class ColumnTextLayout {
         int firstCharPosition = getFirstChar();
         int lastLine = getLastLine(width, height);
         int nbChar = getLastChar(lastLine, width);
-
-        Log.i("TEST", "->" + firstCharPosition + " " + lastLine + " " + nbChar);
         StaticLayout columnLayout = new StaticLayout(
                 text.subSequence(firstCharPosition, firstCharPosition + nbChar),
                 textPaint,
@@ -47,6 +43,10 @@ public class ColumnTextLayout {
         Column column = new Column(columnLayout, firstCharPosition);
         columns.push(column);
         return column;
+    }
+    
+    public boolean hasNext() {
+        return text.length() > columns.peek().getLastCharPosition();
     }
 
     private int getLastChar(int lastLine, int width) {

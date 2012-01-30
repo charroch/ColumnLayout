@@ -83,6 +83,8 @@ class UnitTests extends AndroidTestCase {
         assertEquals("should be " + tc, 'c', tc.charAt(0));
         assertEquals("should be " + tc, 'c', tc.charAt(tc.length() - 1));
         assertEquals(cc.getLineCount, 3)
+        
+        assertFalse(c.hasNext())
     }
   }
 
