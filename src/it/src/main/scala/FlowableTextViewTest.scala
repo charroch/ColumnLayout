@@ -21,10 +21,11 @@ class FlowableTextViewTest extends ActivityInstrumentationTestCase2[ActivityStub
     f.setId(2);
     f.setText(■("Hello World"))
     f.setNextFlowableTextView(next);
+
     val (lineHeight, charWidth) = compute()
 
     val vg = new ViewGroup.LayoutParams(charWidth.toInt * 5, lineHeight.toInt);
-    val vgNext = new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    val vgNext = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
     val latch = new CountDownLatch(1)
     runTestOnUiThread(() => {
       getActivity.setContentView(f, vg)

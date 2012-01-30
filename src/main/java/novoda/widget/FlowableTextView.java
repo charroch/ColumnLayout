@@ -30,12 +30,16 @@ public class FlowableTextView extends TextView {
 
     public FlowableTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        layout = new ColumnTextLayout(getText(), getPaint());
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        layout = new ColumnTextLayout(getText(), getPaint());
+        if (layout == null) {
+            Log.i("TEST", getId() +" <> ");
+            layout = new ColumnTextLayout(getText(), getPaint());
+            next.layout = this.layout;
+        }
+
         int width = right - left;
         int height = bottom - top;
         column = layout.next(width, height);
@@ -43,13 +47,13 @@ public class FlowableTextView extends TextView {
         setText(column.getText());
         setLaidText(column.getText());
 
-        Log.i("TEST", "hello world from: -> " + getId());
+        Log.i("TEST", width + " " + height + "hello world from: -> " + getId() + " " + layout.getText() + " " + column.getText());
         super.onLayout(changed, left, top, right, bottom);
     }
 
     public void setLaidText(CharSequence text) {
         this.laidText = text;
-       // invalidate();
+        // invalidate();
     }
 
     public CharSequence getLaidText() {
@@ -58,6 +62,7 @@ public class FlowableTextView extends TextView {
 
     public void setNextFlowableTextView(FlowableTextView next) {
         next.root = this;
+        next.layout = this.layout;
         this.next = next;
     }
 
