@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="ColumnLayout">
+        <attr name="tilingProperty" format="integer" min="0"/>
+        <attr name="tilingResource" format="color|reference"/>
+        <attr name="tileName" format="string" localization="suggested"/>
+        <attr name="tilingMode">
+            <flag name="center" value="0"/>
+            <flag name="stretched" value="1"/>
+            <flag name="repeating" value="3"/>
+        </attr>
+
+        <attr name="minColumnCount" format="integer" min="1"/>
+        <attr name="columnWidth" format="integer" min="1"/>
+        <attr name="columnOffset" format="integer" value="0"/>
+
+        <attr name="textViewLayout" format="reference"/>
+
+        <attr name="android:layout_margin"/>
+        <attr name="android:layout_marginLeft"/>
+        <attr name="android:layout_marginRight"/>
+        <attr name="android:layout_marginTop"/>
+        <attr name="android:layout_marginBottom"/>
+        <attr name="tilingEnum">
+            <enum name="under" value="0"/>
+            <enum name="over" value="0"/>
+        </attr>
+    </declare-styleable>
+</resources>

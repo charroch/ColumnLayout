@@ -98,19 +98,12 @@ class UnitTests extends AndroidTestCase {
   }
 
   def compute(s: String) = {
-
     val paint = new Paint();
     paint.setAntiAlias(true);
     paint.setTypeface(Typeface.MONOSPACE);
     val p = new TextPaint(paint);
-
-    val unixHeight = -1 * (p.getFontMetricsInt.top + p.getFontMetrics.bottom)
-    val unixAD = -1 * (p.getFontMetricsInt.ascent + p.getFontMetricsInt.descent)
-
-    val span = new SpannableStringBuilder(s.substring(0, 1));
-    val height = new StaticLayout(span, p, 100, Layout.Alignment.ALIGN_NORMAL, 1.0f, 1.0f, true).getHeight
-    val span2 = new SpannableStringBuilder("a");
-    val desiredWidth = Layout.getDesiredWidth(span2, p)
+    val span = new SpannableStringBuilder("a");
+    val desiredWidth = Layout.getDesiredWidth(span, p)
     (scala.math.ceil(desiredWidth), scala.math.ceil(p.getFontSpacing))
   }
 

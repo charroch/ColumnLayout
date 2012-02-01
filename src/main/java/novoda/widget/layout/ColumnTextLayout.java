@@ -44,9 +44,14 @@ public class ColumnTextLayout {
         columns.push(column);
         return column;
     }
-    
+
     public boolean hasNext() {
+        if (columns.empty() && text.length() > 0) return true;
         return text.length() > columns.peek().getLastCharPosition();
+    }
+
+    public int size() {
+        return columns.size();
     }
 
     private int getLastChar(int lastLine, int width) {

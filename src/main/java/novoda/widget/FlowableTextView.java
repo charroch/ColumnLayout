@@ -10,11 +10,22 @@ import novoda.widget.layout.ColumnTextLayout;
 public class FlowableTextView extends TextView {
 
     FlowableTextView next;
+
     FlowableTextView root;
 
     CharSequence originalText;
 
     CharSequence laidText;
+
+    public FlowableViewFactory getViewFactory() {
+        return factory;
+    }
+
+    public void setViewFactory(FlowableViewFactory factory) {
+        this.factory = factory;
+    }
+
+    FlowableViewFactory factory;
 
     private ColumnTextLayout layout;
 
@@ -32,22 +43,50 @@ public class FlowableTextView extends TextView {
         super(context, attrs, defStyle);
     }
 
+    public void requestLayout() {
+        super.requestLayout();
+    }
+
+
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (layout == null) {
-            Log.i("TEST", getId() +" <> ");
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+
+        if (layout == null && getText() != null) {
             layout = new ColumnTextLayout(getText(), getPaint());
-            next.layout = this.layout;
+        } else if (layout.hasNext() && factory != null) {
+
+            Log.i("TEST", layout.size() + " = > is this called? " + width + " " + height);
+
+            Column column = layout.next(width, height);
+            this.setText(column.getText());
+            next = factory.createView(layout);
+            next.factory = this.factory;
+            next.layout = layout;
+            next.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
-        int width = right - left;
-        int height = bottom - top;
-        column = layout.next(width, height);
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
 
-        setText(column.getText());
-        setLaidText(column.getText());
-
-        Log.i("TEST", width + " " + height + "hello world from: -> " + getId() + " " + layout.getText() + " " + column.getText());
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+//        if (layout == null) {
+//            layout = new ColumnTextLayout(getText(), getPaint());
+//            if (next != null) {
+//                next.layout = layout;
+//            }
+//        }
+//        int width = right - left;
+//        int height = bottom - top;
+//        column = layout.next(width, height);
+//        setText(column.getText());
+//        setLaidText(column.getText());
+//        if (layout.hasNext() && factory != null) {
+//            next = factory.createView(layout);
+//            next.layout = layout;
+//        }
         super.onLayout(changed, left, top, right, bottom);
     }
 
@@ -69,4 +108,9 @@ public class FlowableTextView extends TextView {
     public FlowableTextView getNextFlowableTextView() {
         return next;
     }
+
+    public static interface FlowableViewFactory {
+        FlowableTextView createView(ColumnTextLayout layout);
+    }
 }
+

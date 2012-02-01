@@ -35,6 +35,7 @@ object AndroidBuild extends Build {
     file("src/it"),
     settings = General.settings ++ AndroidTest.androidSettings ++ Seq(
       useProguard in Android := false,
+      libraryDependencies += "org.specs2" %% "specs2" % "1.7.1"    ,
       name := "ColumnLayoutTests"
     )
   ) dependsOn main

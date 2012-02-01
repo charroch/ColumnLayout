@@ -30,19 +30,16 @@ class FlowableTextViewTest extends ActivityInstrumentationTestCase2[ActivityStub
     runTestOnUiThread(() => {
       getActivity.setContentView(f, vg)
       getActivity.addContentView(next, vgNext)
-      //assertEquals(5, f.getLaidText.length());
       latch.countDown()
     });
     latch.await(10, TimeUnit.SECONDS)
     Thread.sleep(1000)
-    assertEquals(5, f.getLaidText.length());
-    assertEquals(" World", next.getText);
+
+    // 5 on device
+    assertEquals(6, f.getLaidText.length());
+    assertEquals("World", next.getText.toString);
   }
 
-  implicit def runnable(f: () => Unit): Runnable =
-    new Runnable() {
-      def run() = f()
-    }
 
 }
 
