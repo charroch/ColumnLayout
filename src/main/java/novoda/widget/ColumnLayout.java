@@ -13,6 +13,7 @@ import android.widget.TextView;
 import novoda.widget.layout.ColumnTextLayout;
 
 public class ColumnLayout extends RelativeLayout implements FlowableTextView.FlowableViewFactory {
+
     public static final int COLUMN = 21;
 
     private int columnCount;
@@ -40,9 +41,9 @@ public class ColumnLayout extends RelativeLayout implements FlowableTextView.Flo
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ColumnLayout);
 
-        setColumnCount(a.getInt(R.styleable.ColumnLayout_minColumnCount, 1));
-        setColumnOffset(a.getInt(R.styleable.ColumnLayout_columnOffset, 0));
-        setColumnWidth(a.getInt(R.styleable.ColumnLayout_columnWidth, 0));
+        setColumnCount(a.getInt(R.styleable.ColumnLayout_minColumnCount, -1));
+        setColumnOffset(a.getInt(R.styleable.ColumnLayout_columnOffset, -1));
+        setColumnWidth(a.getInt(R.styleable.ColumnLayout_columnWidth, -1));
 
         int tl = a.getResourceId(R.styleable.ColumnLayout_textViewLayout, -1);
         if (tl == -1) {
@@ -69,75 +70,74 @@ public class ColumnLayout extends RelativeLayout implements FlowableTextView.Flo
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int currentWidth = MeasureSpec.getSize(widthMeasureSpec);
-        int currentHeight = MeasureSpec.getSize(heightMeasureSpec);
-//        if (currentWidth != lastMeasuredWidth || currentHeight != lastMeasuredHeight) {
-//            lastMeasuredWidth = MeasureSpec.getSize(widthMeasureSpec);
-//            lastMeasuredHeight = MeasureSpec.getSize(heightMeasureSpec);
-//            this.removeAllViews();
-//            appendColumns(widthMeasureSpec, heightMeasureSpec);
-//        } else {
-//        }
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
 
+        int columnWith = computeColumnWidth(width);
+        int columnHeight = height;
 
-        for (int i = 0; i < getChildCount(); i++) {
-            View v = getChildAt(i);
-            ColumnLayout.LayoutParams lp = (LayoutParams) v.getLayoutParams();
-            int columnIndex = lp.getColumnRules()[COLUMN];
-            lp.addRule(RIGHT_OF, 123);
-            lp.addRule(ALIGN_PARENT_TOP);
-            //v.setLayoutParams(lp);
-            updateViewLayout(v, lp);
-        }
-
-        int width = columnWidth;
-        int height = currentHeight;
+        measureHeightChildren(columnWith, columnHeight);
 
         int computedWidth = 0;
         int id = 123;
 
-        int i = 0;
-
-
         FlowableTextView view = new FlowableTextView(getContext());
-        view.setTag("column_0");
         view.setTypeface(Typeface.MONOSPACE);
         view.setText(text);
         view.setId(id);
         view.setViewFactory(this);
-        view.requestLayout();
 
-        Log.i("TEST", " => " + view.getMeasuredHeight());
+        view.onMeasure(
+                MeasureSpec.makeMeasureSpec(400, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(727, MeasureSpec.EXACTLY)
+        );
 
 
-        addFlowableView(view, columnWidth, currentHeight, id);
-//        LayoutParams lp = getChildLayoutParams(columnWidth, currentHeight, id);
-//        addView(view, lp);
-
-//        view.requestLayout();
-
+        addFlowableView(view, columnWidth, height, id);
         computedWidth += 2500;
-        id += 1;
-
-
-        requestLayout();
 
         debug(100);
-        super.onMeasure(MeasureSpec.makeMeasureSpec(computedWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(currentHeight, MeasureSpec.EXACTLY));
-        setMeasuredDimension(MeasureSpec.makeMeasureSpec(computedWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(currentHeight, MeasureSpec.EXACTLY));
+        super.onMeasure(
+                MeasureSpec.makeMeasureSpec(computedWidth, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+        );
+        setMeasuredDimension(MeasureSpec.makeMeasureSpec(computedWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+    }
+
+    private void measureHeightChildren(int columnWith, int columnHeight) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getChildAt(i);
+            v.setId(6989);
+            ColumnLayout.LayoutParams lp = (LayoutParams) v.getLayoutParams();
+            v.measure(
+                    MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY)
+            );
+            int columnIndex = lp.getColumnRules()[COLUMN];
+            lp.addRule(RIGHT_OF, 123);
+            lp.addRule(ALIGN_PARENT_TOP);
+            updateViewLayout(v, lp);
+        }
+    }
+
+    private int computeColumnWidth(int viewWidth) {
+        if (columnCount == -1 && columnWidth == -1) {
+            throw new IllegalStateException("need to set column count or columnWidth");
+        }
+        if (columnWidth > 0) {
+            return columnWidth;
+        } else {
+            return (int) Math.floor(viewWidth / (columnCount + columnGap));
+        }
     }
 
     private void addFlowableView(FlowableTextView view, int width, int h, int id) {
-        Log.i("TEST", this + "addFlowableView should be after is this called ");
         LayoutParams lp = getChildLayoutParams(width, h, id);
-
-        Log.i("TEST", " 2 => " + view.getMeasuredHeight() + " " + view.next);
-
         addView(view, lp);
-        if (view.next != null) {
-            Log.i("TEST", "!AD ");
-            addFlowableView(view.next, width, h, id);
-        }
+//        if (view.next != null) {
+//            Log.i("TEST", "!AD ");
+//            addFlowableView(view.next, width, h, id);
+//        }
     }
 
     @Override
@@ -148,6 +148,7 @@ public class ColumnLayout extends RelativeLayout implements FlowableTextView.Flo
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        getAvailableHeight(1);
     }
 
 
@@ -156,6 +157,9 @@ public class ColumnLayout extends RelativeLayout implements FlowableTextView.Flo
         if (id == 123) {
             p.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             p.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        } else if (id == 124) {
+            p.addRule(RelativeLayout.BELOW, 6989);
+            p.addRule(RelativeLayout.RIGHT_OF, id - 1);
         } else {
             p.addRule(RelativeLayout.ALIGN_PARENT_TOP);
             p.addRule(RelativeLayout.RIGHT_OF, id - 1);
@@ -166,6 +170,24 @@ public class ColumnLayout extends RelativeLayout implements FlowableTextView.Flo
 
     private void addTextView(CharSequence tv) {
 
+    }
+
+    private int getAvailableHeight(int column) {
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            View v = getChildAt(i);
+            ColumnLayout.LayoutParams lp = (LayoutParams) v.getLayoutParams();
+            int columnIndex = lp.getColumnRules()[COLUMN];
+            if (columnIndex == column) {
+                Log.i("TEST", column + "<- column " + v + " measure " + v.getMeasuredHeight());
+                return getColumnHeight() - v.getMeasuredHeight();
+            }
+        }
+        return getColumnHeight();
+    }
+
+    private int getColumnHeight() {
+        return 726;
     }
 
     public void setText(CharSequence text) {
@@ -200,11 +222,18 @@ public class ColumnLayout extends RelativeLayout implements FlowableTextView.Flo
     public FlowableTextView createView(ColumnTextLayout layout) {
         Log.i("TEST", "creating view : " + i + " " + layout);
         FlowableTextView v = new FlowableTextView(getContext());
-        //v.setLayoutParams(getChildLayoutParams(400, 727, i));
+        v.setLayout(layout);
+        v.setViewFactory(this);
         v.setId(i);
-        //addView(v, getChildLayoutParams(400, 727, i));
+
+        int availableHeight = getAvailableHeight(layout.size());
+
+        addView(v, getChildLayoutParams(400, availableHeight, i));
         i++;
-        v.requestLayout();
+        v.onMeasure(
+                MeasureSpec.makeMeasureSpec(400, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(availableHeight, MeasureSpec.EXACTLY)
+        );
         return v;
     }
 

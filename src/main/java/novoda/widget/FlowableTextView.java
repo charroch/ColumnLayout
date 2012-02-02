@@ -2,7 +2,6 @@ package novoda.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.TextView;
 import novoda.widget.layout.Column;
 import novoda.widget.layout.ColumnTextLayout;
@@ -55,19 +54,22 @@ public class FlowableTextView extends TextView {
 
         if (layout == null && getText() != null) {
             layout = new ColumnTextLayout(getText(), getPaint());
-        } else if (layout.hasNext() && factory != null) {
+        }
 
-            Log.i("TEST", layout.size() + " = > is this called? " + width + " " + height);
-
+        if (layout.hasNext() && factory != null) {
             Column column = layout.next(width, height);
             this.setText(column.getText());
             next = factory.createView(layout);
-            next.factory = this.factory;
-            next.layout = layout;
-            next.onMeasure(widthMeasureSpec, heightMeasureSpec);
+//
+//            next.factory = this.factory;
+//            next.layout = layout;
         }
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+    
+    public void setLayout(ColumnTextLayout l) {
+        this.layout = l;
     }
 
     @Override

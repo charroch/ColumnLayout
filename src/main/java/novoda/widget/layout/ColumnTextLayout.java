@@ -47,6 +47,7 @@ public class ColumnTextLayout {
 
     public boolean hasNext() {
         if (columns.empty() && text.length() > 0) return true;
+        if (columns.empty() && text.length() == 0) return false;
         return text.length() > columns.peek().getLastCharPosition();
     }
 
