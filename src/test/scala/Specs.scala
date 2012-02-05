@@ -1,10 +1,19 @@
-import novoda.widget
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.Spec
+import android.content.Context
+import novoda.widget.ColumnLayout
+import org.specs2.mock.Mockito
 
-class Specs extends Spec with ShouldMatchers {
-  describe("a spec") {
-    it("should do something") {
+class HelloWorldSpec extends RoboSpecs with Mockito {
+
+  "The 'Hello world' string" should {
+    "contain 11 characters" in {
+      "Hello world" must have size (11)
+    }
+    "start with 'Hello'" in {
+      "Hello world" must startWith("Hello")
+    }
+    "end with 'world'" in {
+      val cl = new ColumnLayout(mock[Context])
+      "Hello world" must endWith("world")
     }
   }
 }

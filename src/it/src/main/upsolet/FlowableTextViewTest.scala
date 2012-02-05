@@ -8,7 +8,7 @@ import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup
 
 
-class FlowableTextViewTest extends ActivityInstrumentationTestCase2[ActivityStub](classOf[ActivityStub]) with TextLayoutUtil {
+class FlowableTextViewTest extends ActivityInstrumentationTestCase2[ActivityStub](classOf[ActivityStub]) with TextLayoutUtil with ShouldMatchers {
 
 
   def test_should_break_after_5_character {

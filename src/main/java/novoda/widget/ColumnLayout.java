@@ -2,31 +2,43 @@ package novoda.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import novoda.widget.layout.ColumnTextLayout;
 
-public class ColumnLayout extends RelativeLayout implements FlowableTextView.FlowableViewFactory {
+import static android.view.View.MeasureSpec.makeMeasureSpec;
 
-    public static final int COLUMN = 21;
+
+public class ColumnLayout extends ViewGroup {
 
     private int columnCount;
-
-    private CharSequence text;
-
-    private int columnGap = 20;
-
-    private TextView textView;
-
-    // by how many column would you offset?
-    private int columnOffset;
     private int columnWidth;
+    private int columnGap;
+
+    public int getColumnCount() {
+        return columnCount;
+    }
+
+    public void setColumnCount(int columnCount) {
+        this.columnCount = columnCount;
+    }
+
+    public int getColumnWidth() {
+        return columnWidth;
+    }
+
+    public void setColumnWidth(int columnWidth) {
+        this.columnWidth = columnWidth;
+    }
+
+    public int getColumnGap() {
+        return columnGap;
+    }
+
+    public void setColumnGap(int columnGap) {
+        this.columnGap = columnGap;
+    }
 
     public ColumnLayout(Context context) {
         this(context, null);
@@ -38,33 +50,14 @@ public class ColumnLayout extends RelativeLayout implements FlowableTextView.Flo
 
     public ColumnLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ColumnLayout);
-
-        setColumnCount(a.getInt(R.styleable.ColumnLayout_minColumnCount, -1));
-        setColumnOffset(a.getInt(R.styleable.ColumnLayout_columnOffset, -1));
-        setColumnWidth(a.getInt(R.styleable.ColumnLayout_columnWidth, -1));
-
-        int tl = a.getResourceId(R.styleable.ColumnLayout_textViewLayout, -1);
-        if (tl == -1) {
-            textView = new TextView(context);
-        } else {
-            textView = (TextView) LayoutInflater.from(context).inflate(tl, null);
+        try {
+            setColumnCount(a.getInt(R.styleable.ColumnLayout_minColumnCount, 1));
+            setColumnGap(a.getInt(R.styleable.ColumnLayout_columnGap, 0));
+            setColumnWidth(a.getInt(R.styleable.ColumnLayout_columnWidth, 0));
+        } finally {
+            a.recycle();
         }
-        super.setChildrenDrawingOrderEnabled(true);
-    }
-
-    private int lastMeasuredWidth = -1;
-
-    private int lastMeasuredHeight = -1;
-
-
-    public void setColumnWidth(int width) {
-        this.columnWidth = width;
-    }
-
-    public void setColumnGap(int gap) {
-        this.columnGap = gap;
     }
 
 
@@ -73,51 +66,86 @@ public class ColumnLayout extends RelativeLayout implements FlowableTextView.Flo
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
-        int columnWith = computeColumnWidth(width);
-        int columnHeight = height;
+        int columnWidth = computeColumnWidth(width);
+        int columnCount = computeColumnCount();
 
-        measureHeightChildren(columnWith, columnHeight);
+        for (int i = 0; i < computeColumnCount(); i++) {
+            measureChildrenInColumn(i, widthMeasureSpec, heightMeasureSpec);
+        }
 
-        int computedWidth = 0;
-        int id = 123;
+        //setMeasuredDimension(width, height);
 
-        FlowableTextView view = new FlowableTextView(getContext());
-        view.setTypeface(Typeface.MONOSPACE);
-        view.setText(text);
-        view.setId(id);
-        view.setViewFactory(this);
+        int m = makeMeasureSpec(columnWidth, MeasureSpec.AT_MOST);
+        measureChildren(m, heightMeasureSpec);
+        setMeasuredDimension(width, height);
 
-        view.onMeasure(
-                MeasureSpec.makeMeasureSpec(400, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(727, MeasureSpec.EXACTLY)
-        );
-
-
-        addFlowableView(view, columnWidth, height, id);
-        computedWidth += 2500;
-
-        debug(100);
-        super.onMeasure(
-                MeasureSpec.makeMeasureSpec(computedWidth, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
-        );
-        setMeasuredDimension(MeasureSpec.makeMeasureSpec(computedWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    private void measureHeightChildren(int columnWith, int columnHeight) {
-        for (int i = 0; i < getChildCount(); i++) {
-            View v = getChildAt(i);
-            v.setId(6989);
-            ColumnLayout.LayoutParams lp = (LayoutParams) v.getLayoutParams();
-            v.measure(
-                    MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY)
-            );
-            int columnIndex = lp.getColumnRules()[COLUMN];
-            lp.addRule(RIGHT_OF, 123);
-            lp.addRule(ALIGN_PARENT_TOP);
-            updateViewLayout(v, lp);
+
+    private void measureChildrenInColumn(final int column, final int widthMeasureSpec, final int heightMeasureSpec) {
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int height = MeasureSpec.getSize(heightMeasureSpec);
+        final int columnWidth = computeColumnWidth(width);
+        final int columnWidthSpec = makeMeasureSpec(columnWidth, MeasureSpec.AT_MOST);
+
+        applyToChildren(new ViewFunctor() {
+
+            private int occupiedHeight = 0;
+
+            @Override
+            public void apply(View child) {
+                LayoutParams params = getLayoutParams(child);
+                if (params.columnIndex == column) {
+                    int heightSpec = makeMeasureSpec(height - occupiedHeight, MeasureSpec.AT_MOST);
+                    child.measure(columnWidthSpec, heightSpec);
+                    Log.i("TEST", occupiedHeight + "  " + child + " " + column + " " + child.getMeasuredHeight() + " measured for child");
+                    occupiedHeight += child.getMeasuredHeight();
+                }
+            }
+
+        });
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        Log.i("TEST", "hello world" + left + " " + top + " r" + right + " " + bottom);
+
+        int width = Math.abs(left + right);
+        int height = Math.abs(top + bottom);
+        int columnWidth = computeColumnWidth(width);
+
+        for (int i = 0; i < computeColumnCount(); i++) {
+            layoutChildrenInColumn(i, changed, left, top, right, bottom);
         }
+    }
+
+    private void layoutChildrenInColumn(final int column, boolean changed, final int left, final int top, final int right, final int bottom) {
+
+        int width = Math.abs(left + right);
+        int height = Math.abs(top + bottom);
+        final int columnWidth = computeColumnWidth(width);
+        applyToChildren(new ViewFunctor() {
+
+            private int currentTop = 0;
+
+            @Override
+            public void apply(View child) {
+                Log.i("TEST", "tioo " + top + " " + currentTop);
+                LayoutParams params = getLayoutParams(child);
+                if (params.columnIndex == column) {
+                    int offset = params.columnIndex * columnWidth;
+                    int spans = params.columnsSpan;   
+                    Log.i("TEST",child.getId() + " " +params.height +  " H " + child.getMeasuredHeight());
+                    child.layout(offset, currentTop, offset + (columnWidth * spans), currentTop + child.getMeasuredHeight());
+                    currentTop += child.getMeasuredHeight();
+                }
+            }
+        });
+    }
+
+    private LayoutParams getLayoutParams(View c) {
+        return (LayoutParams) c.getLayoutParams();
     }
 
     private int computeColumnWidth(int viewWidth) {
@@ -127,162 +155,74 @@ public class ColumnLayout extends RelativeLayout implements FlowableTextView.Flo
         if (columnWidth > 0) {
             return columnWidth;
         } else {
-            return (int) Math.floor(viewWidth / (columnCount + columnGap));
+            return (int) Math.floor((viewWidth - columnCount + columnGap) / columnCount);
         }
     }
 
-    private void addFlowableView(FlowableTextView view, int width, int h, int id) {
-        LayoutParams lp = getChildLayoutParams(width, h, id);
-        addView(view, lp);
-//        if (view.next != null) {
-//            Log.i("TEST", "!AD ");
-//            addFlowableView(view.next, width, h, id);
-//        }
-    }
-
-    @Override
-    protected int getChildDrawingOrder(int childCount, int i) {
-        return i;
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        getAvailableHeight(1);
-    }
-
-
-    private LayoutParams getChildLayoutParams(int width, int height, int id) {
-        LayoutParams p = new LayoutParams(width, height);
-        if (id == 123) {
-            p.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            p.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-        } else if (id == 124) {
-            p.addRule(RelativeLayout.BELOW, 6989);
-            p.addRule(RelativeLayout.RIGHT_OF, id - 1);
-        } else {
-            p.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            p.addRule(RelativeLayout.RIGHT_OF, id - 1);
-        }
-        p.setMargins(0, 0, columnGap, 0);
-        return p;
-    }
-
-    private void addTextView(CharSequence tv) {
-
-    }
-
-    private int getAvailableHeight(int column) {
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
+    private int computeColumnCount() {
+        int c = 0;
+        for (int i = 0, N = getChildCount(); i < N; i++) {
             View v = getChildAt(i);
-            ColumnLayout.LayoutParams lp = (LayoutParams) v.getLayoutParams();
-            int columnIndex = lp.getColumnRules()[COLUMN];
-            if (columnIndex == column) {
-                Log.i("TEST", column + "<- column " + v + " measure " + v.getMeasuredHeight());
-                return getColumnHeight() - v.getMeasuredHeight();
+
+            int t = getLayoutParams(v).columnIndex;
+            if (t > c) {
+                c = t;
             }
         }
-        return getColumnHeight();
+        return c + 1;
     }
 
-    private int getColumnHeight() {
-        return 726;
-    }
 
-    public void setText(CharSequence text) {
-        this.text = text;
-    }
+    public static class LayoutParams extends ViewGroup.MarginLayoutParams {
 
-    public CharSequence getText() {
-        return text;
-    }
+        private static final int COLUMN_SPAN = 1;
 
-    public void setColumnOffset(int columnOffset) {
-        this.columnOffset = columnOffset;
-        invalidate();
-    }
-
-    public int getColumnOffset() {
-        return columnOffset;
-    }
-
-    public void setColumnCount(int columnCount) {
-        this.columnCount = columnCount;
-        invalidate();
-    }
-
-    public int getColumnCount() {
-        return columnCount;
-    }
-
-    int i = 124;
-
-    @Override
-    public FlowableTextView createView(ColumnTextLayout layout) {
-        Log.i("TEST", "creating view : " + i + " " + layout);
-        FlowableTextView v = new FlowableTextView(getContext());
-        v.setLayout(layout);
-        v.setViewFactory(this);
-        v.setId(i);
-
-        int availableHeight = getAvailableHeight(layout.size());
-
-        addView(v, getChildLayoutParams(400, availableHeight, i));
-        i++;
-        v.onMeasure(
-                MeasureSpec.makeMeasureSpec(400, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(availableHeight, MeasureSpec.EXACTLY)
-        );
-        return v;
-    }
-
-    /**
-     * Specific layout for column Span which extends relative's layout
-     */
-    public static class LayoutParams extends RelativeLayout.LayoutParams {
-
-        public boolean alignWithParent;
-
-        private int[] mRules;
+        private int columnIndex;
+        private int columnsSpan = 1;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
-            mRules = new int[100];
         }
 
         public LayoutParams(int w, int h) {
             super(w, h);
-            mRules = new int[100];
         }
 
         public LayoutParams(ViewGroup.LayoutParams source) {
             super(source);
-            mRules = new int[100];
         }
 
-        public LayoutParams(MarginLayoutParams source) {
+        public LayoutParams(ViewGroup.MarginLayoutParams source) {
             super(source);
-            mRules = new int[100];
         }
 
-        public void addRule(int verb) {
-            super.addRule(verb);
+        public void setColumn(int index) {
+            this.columnIndex = index;
         }
 
-        public void addRule(int verb, int anchor) {
-            switch (verb) {
-                case COLUMN:
-                    mRules[verb] = anchor;
-                    break;
-                default:
-                    super.addRule(verb, anchor);
-                    break;
-            }
+        public void setColumnSpan(int columns) {
+            this.columnsSpan = columns;
         }
+    }
 
-        public int[] getColumnRules() {
-            return mRules;
+    interface Functor<T> {
+        void apply(T data);
+    }
+
+    interface FilterFunctor<T, R> {
+        R apply(T data);
+    }
+
+    interface ViewFunctor extends Functor<View> {
+    }
+
+    interface ViewFilterFunctor<R> extends FilterFunctor<View, R> {
+    }
+
+    private void applyToChildren(ViewFunctor functor) {
+        for (int i = 0, N = getChildCount(); i < N; i++) {
+            View v = getChildAt(i);
+            functor.apply(v);
         }
     }
 }

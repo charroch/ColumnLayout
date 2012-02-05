@@ -15,11 +15,20 @@ object General {
   lazy val fullAndroidSettings =
     General.settings ++
       AndroidProject.androidSettings ++
-      TypedResources.settings ++
-      AndroidMarketPublish.settings ++ Seq(
-      keyalias in Android := "change-me",
+      TypedResources.settings ++ Seq(
       useProguard in Android := false,
-      libraryDependencies += "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+      resolvers ++= Seq("snapshots" at "http://scala-tools.org/repo-snapshots",
+        "releases" at "http://scala-tools.org/repo-releases"),
+      libraryDependencies ++= Seq(
+        "com.pivotallabs" % "robolectric" % "1.0" % "test",
+        "junit" % "junit-dep" % "4.8.2" % "test",
+        "org.specs2" %% "specs2" % "1.8-SNAPSHOT" % "test",
+        "org.mockito" % "mockito-all" % "1.9.0" % "test"
+      ),
+      fullClasspath in Test ~= {
+        (cp: Classpath) =>
+          cp.sortWith((a, b) => !a.data.toString.contains("android"))
+      }
     )
 }
 
@@ -35,7 +44,8 @@ object AndroidBuild extends Build {
     file("src/it"),
     settings = General.settings ++ AndroidTest.androidSettings ++ Seq(
       useProguard in Android := false,
-      libraryDependencies += "org.specs2" %% "specs2" % "1.7.1"    ,
+      libraryDependencies ++= Seq("org.scalatest" %% "scalatest" % "1.6.1",
+        "net.orfjackal.specsy" % "specsy" % "1.2.0"),
       name := "ColumnLayoutTests"
     )
   ) dependsOn main

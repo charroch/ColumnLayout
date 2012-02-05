@@ -14,6 +14,7 @@
         <attr name="minColumnCount" format="integer" min="1"/>
         <attr name="columnWidth" format="integer" min="1"/>
         <attr name="columnOffset" format="integer" value="0"/>
+        <attr name="columnGap" format="integer" value="0"/>
 
         <attr name="textViewLayout" format="reference"/>
 
