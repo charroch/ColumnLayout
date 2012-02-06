@@ -4,8 +4,12 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.view.View.MeasureSpec.makeMeasureSpec;
 
@@ -15,6 +19,8 @@ public class ColumnLayout extends ViewGroup {
     private int columnCount;
     private int columnWidth;
     private int columnGap;
+
+    private List<Column> columns;
 
     public int getColumnCount() {
         return columnCount;
@@ -50,6 +56,7 @@ public class ColumnLayout extends ViewGroup {
 
     public ColumnLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        columns = new ArrayList<Column>();
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ColumnLayout);
         try {
             setColumnCount(a.getInt(R.styleable.ColumnLayout_minColumnCount, 1));
@@ -69,19 +76,21 @@ public class ColumnLayout extends ViewGroup {
         int columnWidth = computeColumnWidth(width);
         int columnCount = computeColumnCount();
 
+        int m = makeMeasureSpec(columnWidth, MeasureSpec.AT_MOST);
+
+        // TODO why we need to measure children first?
+        // measureChildren(m, heightMeasureSpec);
+
         for (int i = 0; i < computeColumnCount(); i++) {
             measureChildrenInColumn(i, widthMeasureSpec, heightMeasureSpec);
         }
 
-        //setMeasuredDimension(width, height);
-
-        int m = makeMeasureSpec(columnWidth, MeasureSpec.AT_MOST);
         measureChildren(m, heightMeasureSpec);
         setMeasuredDimension(width, height);
-
-        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
+
+    SparseArray<View> spans = new SparseArray<View>();
 
     private void measureChildrenInColumn(final int column, final int widthMeasureSpec, final int heightMeasureSpec) {
         final int width = MeasureSpec.getSize(widthMeasureSpec);
@@ -96,10 +105,28 @@ public class ColumnLayout extends ViewGroup {
             @Override
             public void apply(View child) {
                 LayoutParams params = getLayoutParams(child);
+
+                if (params.alignment == LayoutParams.ALIGN_PARENT_BOTTOM) {
+                    Log.i("TEST", "should align bottom");
+                }
+
                 if (params.columnIndex == column) {
+
+                    if (params.columnsSpan > 1) {
+                        spans.put(params.columnIndex, child);
+                    }
+
+
+                    View v = spans.get(params.columnIndex - 1);
+                    if (v != null) {
+                        occupiedHeight += v.getMeasuredHeight();
+                    }
+
                     int heightSpec = makeMeasureSpec(height - occupiedHeight, MeasureSpec.AT_MOST);
                     child.measure(columnWidthSpec, heightSpec);
-                    Log.i("TEST", occupiedHeight + "  " + child + " " + column + " " + child.getMeasuredHeight() + " measured for child");
+
+                    Log.i("TEST", child + "should add: " + child.getMeasuredHeight() + " " + occupiedHeight + " " + height);
+
                     occupiedHeight += child.getMeasuredHeight();
                 }
             }
@@ -129,16 +156,39 @@ public class ColumnLayout extends ViewGroup {
 
             private int currentTop = 0;
 
+            private int currentBottom = bottom;
+
             @Override
             public void apply(View child) {
-                Log.i("TEST", "tioo " + top + " " + currentTop);
                 LayoutParams params = getLayoutParams(child);
                 if (params.columnIndex == column) {
                     int offset = params.columnIndex * columnWidth;
-                    int spans = params.columnsSpan;   
-                    Log.i("TEST",child.getId() + " " +params.height +  " H " + child.getMeasuredHeight());
-                    child.layout(offset, currentTop, offset + (columnWidth * spans), currentTop + child.getMeasuredHeight());
-                    currentTop += child.getMeasuredHeight();
+                    int spans2 = params.columnsSpan;
+                    Log.i("TEST", child.getId() + " " + params.height + " H " + child.getMeasuredHeight());
+
+                    boolean laid = false;
+                    if (params.alignment == LayoutParams.ALIGN_PARENT_BOTTOM) {
+                        int measuredHeight = child.getMeasuredHeight();
+                        child.layout(offset, bottom - measuredHeight, offset + (columnWidth * spans2), bottom);
+                        laid = true;
+                        currentBottom -= measuredHeight;
+                    }
+
+                    View v = spans.get(params.columnIndex - 1);
+                    if (v != null) {
+                        Log.i("TEST", v + "should add: " + v.getMeasuredHeight());
+                        currentTop += v.getMeasuredHeight();
+                    }
+
+                    int bottomComputed = currentTop + child.getMeasuredHeight();
+                    if (params.height == LayoutParams.FILL_PARENT) {
+                        bottomComputed = currentBottom;
+                    }
+
+                    if (!laid) {
+                        child.layout(offset, currentTop, offset + (columnWidth * spans2), bottomComputed);
+                        currentTop += child.getMeasuredHeight();
+                    }
                 }
             }
         });
@@ -176,7 +226,10 @@ public class ColumnLayout extends ViewGroup {
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
 
         private static final int COLUMN_SPAN = 1;
+        public static final int ALIGN_PARENT_BOTTOM = 1;
+        public static final int ALIGN_PARENT_TOP = 2;
 
+        private int alignment;
         private int columnIndex;
         private int columnsSpan = 1;
 
@@ -203,6 +256,10 @@ public class ColumnLayout extends ViewGroup {
         public void setColumnSpan(int columns) {
             this.columnsSpan = columns;
         }
+
+        public void alignBottom() {
+            alignment = ALIGN_PARENT_BOTTOM;
+        }
     }
 
     interface Functor<T> {
@@ -223,6 +280,82 @@ public class ColumnLayout extends ViewGroup {
         for (int i = 0, N = getChildCount(); i < N; i++) {
             View v = getChildAt(i);
             functor.apply(v);
+        }
+    }
+
+
+    private class Span {
+
+    }
+
+    private class Alignment {
+
+    }
+
+    private class Column {
+
+        //private SparseArray<>
+
+        private List<View> inColumn;
+
+        private int topSpanPadding = 0;
+
+        private int bottomSpanPadding = 0;
+
+        private final int height;
+
+        private Column(int height) {
+            inColumn = new ArrayList<View>();
+            bottomSpanPadding = height;
+            this.height = height;
+        }
+
+        public int getTop(View view) {
+            LayoutParams params = getLayoutParams(view);
+            if (params.alignment == LayoutParams.ALIGN_PARENT_TOP) {
+                return 0;
+            } else {
+                return topSpanPadding;
+            }
+        }
+
+        public int getBottom(View view) {
+            LayoutParams params = getLayoutParams(view);
+            if (params.alignment == LayoutParams.ALIGN_PARENT_BOTTOM) {
+                return height;
+            } else {
+                return bottomSpanPadding;
+            }
+        }
+
+        public void add(int i, View view) {
+            inColumn.add(i, view);
+        }
+
+        public boolean add(View view) {
+            LayoutParams params = getLayoutParams(view);
+            if (params.alignment == LayoutParams.ALIGN_PARENT_BOTTOM) {
+                bottomSpanPadding -= view.getMeasuredHeight();
+            } else if (params.alignment == LayoutParams.ALIGN_PARENT_TOP) {
+                topSpanPadding += view.getMeasuredHeight();
+            }
+            return inColumn.add(view);
+        }
+
+        public boolean contains(Object o) {
+            return inColumn.contains(o);
+        }
+
+        public View get(int i) {
+            return inColumn.get(i);
+        }
+
+        public int indexOf(Object o) {
+            return inColumn.indexOf(o);
+        }
+
+        public boolean isEmpty() {
+            return inColumn.isEmpty();
         }
     }
 }
