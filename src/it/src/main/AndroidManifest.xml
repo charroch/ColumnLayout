@@ -24,6 +24,6 @@
     </application>
     <instrumentation
             android:label="Tests" android:targetPackage="novoda.widget"
-            android:name="android.test.InstrumentationTestRunner">
+            android:name="novoda.android.scala.SpecRunner">
     </instrumentation>
 </manifest>
