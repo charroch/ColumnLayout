@@ -4,15 +4,6 @@
 
         <attr name="columnCount" format="integer"/>
 
-        <attr name="tilingProperty" format="integer" min="0"/>
-        <attr name="tilingResource" format="color|reference"/>
-        <attr name="tileName" format="string" localization="suggested"/>
-        <attr name="tilingMode">
-            <flag name="center" value="0"/>
-            <flag name="stretched" value="1"/>
-            <flag name="repeating" value="3"/>
-        </attr>
-
         <attr name="minColumnCount" format="integer" min="1"/>
         <attr name="columnWidth" format="dimension" />
         <attr name="columnOffset" format="integer" value="0"/>

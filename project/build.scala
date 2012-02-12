@@ -17,10 +17,12 @@ object General {
       AndroidProject.androidSettings ++
       TypedResources.settings ++ Seq(
       useProguard in Android := false,
+      instrumentationRunner in Android := "novoda.android.scala.SpecRunner",
 
       resolvers ++= Seq(
         "snapshots" at "http://scala-tools.org/repo-snapshots",
-        "releases" at "http://scala-tools.org/repo-releases"      ),
+        "releases" at "http://scala-tools.org/repo-releases"
+      ),
 
       libraryDependencies ++= Seq(
         "com.pivotallabs" % "robolectric" % "1.0" % "test",
@@ -34,6 +36,7 @@ object General {
           cp.sortWith((a, b) => !a.data.toString.contains("android"))
       }
     )
+}
 
 object AndroidBuild extends Build {
   lazy val main = Project(
@@ -45,12 +48,13 @@ object AndroidBuild extends Build {
   lazy val tests = Project(
     "tests",
     file("src/it"),
-    settings = General.settings ++ AndroidTest.androidSettings ++ Seq(
+    settings = General.settings ++ AndroidTest.androidSettings ++ AndroidTest.settings ++ Seq(
       useProguard in Android := false,
       libraryDependencies ++= Seq("org.scalatest" %% "scalatest" % "1.7.1"),
-      instrumentationRunner := "novoda.android.scala.SpecRunner",
+      instrumentationRunner in Android := "novoda.android.scala.SpecRunner",
       name := "ColumnLayoutTests"
     )
   ) dependsOn main
-
 }
+
+
