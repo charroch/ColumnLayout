@@ -8,6 +8,7 @@ import novoda.android.test.ViewMatchers
 import android.widget.{ImageView, TextView}
 import android.content.Context
 import android.widget.ImageView.ScaleType
+import novoda.test.StackSpec
 
 
 class ColumnLayoutTest extends ActivityInstrumentationTestCase2[ActivityStub](classOf[ActivityStub])
@@ -16,7 +17,7 @@ with TextLayoutUtil with ShouldMatchersForJUnit with ViewMatchers {
   import novoda.android.test.RichView._
 
   def `test simple text column` {
-
+    (new StackSpec).execute()
 
     implicit val context = getActivity.getApplicationContext
     val layout = new ColumnLayout(context)
