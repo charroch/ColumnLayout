@@ -2,6 +2,7 @@ package novoda.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.TextView;
 import novoda.widget.layout.Column;
 import novoda.widget.layout.ColumnTextLayout;
@@ -15,6 +16,7 @@ public class FlowableTextView extends TextView {
     CharSequence originalText;
 
     CharSequence laidText;
+    private boolean isInitiated = false;
 
     public FlowableViewFactory getViewFactory() {
         return factory;
@@ -56,39 +58,27 @@ public class FlowableTextView extends TextView {
             layout = new ColumnTextLayout(getText(), getPaint());
         }
 
-        if (layout.hasNext() && factory != null) {
+        if (layout.hasNext() && !isInitiated) {
+
+            Log.i("TEST", "=====================> width: " + width + " height: " + height);
             Column column = layout.next(width, height);
             this.setText(column.getText());
-            next = factory.createView(layout);
+            // next = factory.createView(layout);
 //
 //            next.factory = this.factory;
 //            next.layout = layout;
+            isInitiated = true;
         }
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
-    
+
     public void setLayout(ColumnTextLayout l) {
         this.layout = l;
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-//        if (layout == null) {
-//            layout = new ColumnTextLayout(getText(), getPaint());
-//            if (next != null) {
-//                next.layout = layout;
-//            }
-//        }
-//        int width = right - left;
-//        int height = bottom - top;
-//        column = layout.next(width, height);
-//        setText(column.getText());
-//        setLaidText(column.getText());
-//        if (layout.hasNext() && factory != null) {
-//            next = factory.createView(layout);
-//            next.layout = layout;
-//        }
         super.onLayout(changed, left, top, right, bottom);
     }
 

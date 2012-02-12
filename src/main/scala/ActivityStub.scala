@@ -54,10 +54,10 @@ class SimpleTextColumn extends Activity {
     tv2.append(ipsum)
     tv3.setText(ipsum)
 
-    layout.addView(textView, lp);
-    layout.addView(imageView, lp3);
-    layout.addView(tv2, lp2);
-    layout.addView(tv3, lp4);
+//    layout.addView(textView, lp);
+//    layout.addView(imageView, lp3);
+//    layout.addView(tv2, lp2);
+//    layout.addView(tv3, lp4);
 
     setContentView(layout);
   }

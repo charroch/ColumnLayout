@@ -8,6 +8,7 @@ import novoda.android.test.ViewMatchers
 import android.widget.{ImageView, TextView}
 import android.content.Context
 import android.widget.ImageView.ScaleType
+import novoda.test.StackSpec
 
 
 class ColumnLayoutTest extends ActivityInstrumentationTestCase2[ActivityStub](classOf[ActivityStub])
@@ -16,7 +17,7 @@ with TextLayoutUtil with ShouldMatchersForJUnit with ViewMatchers {
   import novoda.android.test.RichView._
 
   def `test simple text column` {
-
+    (new StackSpec).execute()
 
     implicit val context = getActivity.getApplicationContext
     val layout = new ColumnLayout(context)
@@ -54,7 +55,7 @@ with TextLayoutUtil with ShouldMatchersForJUnit with ViewMatchers {
       getActivity.setContentView(
         layout,
         new ColumnLayout.LayoutParams(
-          LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+          LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT)
       )
       latch.countDown()
     });
@@ -119,7 +120,7 @@ with TextLayoutUtil with ShouldMatchersForJUnit with ViewMatchers {
     val lp = new ColumnLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
     lp.setColumn(0)
 
-    val imageLayout = new ColumnLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT)
+    val imageLayout = new ColumnLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT)
     imageLayout.setColumn(1)
     imageLayout.setColumnSpan(2)
     val img = image(500, 500)

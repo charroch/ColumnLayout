@@ -1,6 +1,5 @@
 package novoda.widget.layout;
 
-import android.graphics.Rect;
 import android.text.Layout;
 
 public class Column {
