@@ -52,6 +52,11 @@ object AndroidBuild extends Build {
       useProguard in Android := false,
       libraryDependencies ++= Seq("org.scalatest" %% "scalatest" % "1.7.1"),
       instrumentationRunner in Android := "novoda.android.scala.SpecRunner",
+      instrumentationRunner := "novoda.android.scala.SpecRunner",
+      dxInputs in Android ~= {
+        (inputs: Seq[File]) =>
+          inputs.filterNot(_.getName.contains("scalatest"))
+      },
       name := "ColumnLayoutTests"
     )
   ) dependsOn main
