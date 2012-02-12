@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <declare-styleable name="ColumnLayout">
+
+        <attr name="columnCount" format="integer"/>
+
         <attr name="tilingProperty" format="integer" min="0"/>
         <attr name="tilingResource" format="color|reference"/>
         <attr name="tileName" format="string" localization="suggested"/>
@@ -12,9 +14,10 @@
         </attr>
 
         <attr name="minColumnCount" format="integer" min="1"/>
-        <attr name="columnWidth" format="integer" min="1"/>
+        <attr name="columnWidth" format="dimension" />
         <attr name="columnOffset" format="integer" value="0"/>
-        <attr name="columnGap" format="integer" value="0"/>
+        <attr name="columnGap" format="dimension" value="25dp"/>
+
 
         <attr name="textViewLayout" format="reference"/>
 
@@ -27,5 +30,13 @@
             <enum name="under" value="0"/>
             <enum name="over" value="0"/>
         </attr>
+
+
     </declare-styleable>
+
+    <declare-styleable name="ColumnLayout_Layout">
+        <attr name="layout_column" format="integer" min="0" />
+        <attr name="layout_columnSpan" format="integer" min="1" />
+    </declare-styleable>
+
 </resources>
