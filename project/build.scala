@@ -9,7 +9,12 @@ object General {
     version := "0.1",
     scalaVersion := "2.9.1",
     useProguard in Android := false,
-    platformName in Android := "android-14"
+    platformName in Android := "android-14",
+
+    resolvers ++= Seq(
+      "snapshots" at "http://scala-tools.org/repo-snapshots",
+      "releases" at "http://scala-tools.org/repo-releases"
+    )
   )
 
   lazy val fullAndroidSettings =
@@ -17,12 +22,6 @@ object General {
       AndroidProject.androidSettings ++
       TypedResources.settings ++ Seq(
       useProguard in Android := false,
-      instrumentationRunner in Android := "novoda.android.scala.SpecRunner",
-
-      resolvers ++= Seq(
-        "snapshots" at "http://scala-tools.org/repo-snapshots",
-        "releases" at "http://scala-tools.org/repo-releases"
-      ),
 
       libraryDependencies ++= Seq(
         "com.pivotallabs" % "robolectric" % "1.0" % "test",
@@ -50,9 +49,10 @@ object AndroidBuild extends Build {
     file("src/it"),
     settings = General.settings ++ AndroidTest.androidSettings ++ AndroidTest.settings ++ Seq(
       useProguard in Android := false,
-      libraryDependencies ++= Seq("org.scalatest" %% "scalatest" % "1.7.1"),
-      instrumentationRunner in Android := "novoda.android.scala.SpecRunner",
-      instrumentationRunner := "novoda.android.scala.SpecRunner",
+      libraryDependencies ++= Seq(
+        "org.scalatest" %% "scalatest" % "1.7.1"
+      ),
+      instrumentationRunner in Android := "org.scalatest.tools.SpecRunner",
       dxInputs in Android ~= {
         (inputs: Seq[File]) =>
           inputs.filterNot(_.getName.contains("scalatest"))

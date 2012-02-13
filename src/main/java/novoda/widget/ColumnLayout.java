@@ -7,7 +7,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import novoda.widget.layout.Column;
 import novoda.widget.layout.ColumnTextLayout;
 
 import static android.view.View.MeasureSpec.makeMeasureSpec;
@@ -233,6 +232,33 @@ public class ColumnLayout extends ViewGroup {
             if (alignment == ALIGN_PARENT_BOTTOM) {
                 alignBottom();
             }
+        }
+    }
+
+    public int getPageCount() {
+        return -1;
+    }
+
+    public Page getPage(int index) {
+        return null;
+    }
+
+    final class Page extends ViewGroup {
+
+        public Page(Context context) {
+            this(context, null);
+        }
+
+        public Page(Context context, AttributeSet attrs) {
+            this(context, attrs, 0);
+        }
+
+        public Page(Context context, AttributeSet attrs, int defStyle) {
+            super(context, attrs, defStyle);
+        }
+
+        @Override
+        protected void onLayout(boolean isChanged, int left, int top, int right, int bottom) {
         }
     }
 
