@@ -1,10 +1,14 @@
 import android.graphics.Bitmap
 import android.os.Environment
 import android.test.ActivityInstrumentationTestCase2
+import android.util.Log
 import android.view.View
+import android.view.ViewGroup.LayoutParams
 import android.widget.TextView
 import java.io.{FileOutputStream, File}
+import java.util.concurrent.CountDownLatch
 import novoda.android.test.ViewMatchers
+
 import novoda.widget.{TextLayoutUtil, ActivityStub}
 import org.scalatest.matchers.{MatchResult, ShouldMatchers}
 import org.scalatest.WordSpec
@@ -18,15 +22,27 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers {
   "A Columnist article" should {
     "have a title" in {
 
+      super.setUp()
       val t = new TextView(getActivity);
+      val lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+      val t2 = new TextView(getActivity);
+      t.setText("Hello World")
+      t2.setText("hekll ");
+
+      val latch = new CountDownLatch(1)
       runTestOnUiThread {
         () =>
-          t.setText("Hello World")
-          getActivity.setContentView(t)
-          t should be(parent_aligned(top))
+          getActivity.setContentView(t, lp)
+          getActivity.addContentView(t2, lp)
+          latch.countDown()
       }
-      take(t)
+      t2 should be(below(t))
+      latch.await()
+      import novoda.android.test.RichView._
+      Log.i("TEST", t2.toS + " " + t.toS)
+      Thread.sleep(5000)
       "title" should be("title")
+      super.tearDown()
     }
 
     "have a header" in {
@@ -44,15 +60,16 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers {
 
 
   def take(v: View) {
-    val mPath = "/data/data/novoda.widget.tests/" + "test.png";
+    val mPath = Environment.getExternalStorageDirectory + "/" + "test.png";
 
-    val v1 = v.getRootView();
+    getActivity.getWindow.getDecorView.getRootView
+    val v1 =  getActivity.getWindow.getDecorView.getRootView;
     v1.setDrawingCacheEnabled(true);
     val bitmap = Bitmap.createBitmap(v1.getDrawingCache());
     v1.setDrawingCacheEnabled(false);
     val imageFile = new File(mPath);
     val fout = new FileOutputStream(imageFile);
-    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fout);
+    bitmap.compress(Bitmap.CompressFormat.PNG, 90, fout);
     fout.flush();
     fout.close();
   }
