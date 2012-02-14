@@ -1,11 +1,11 @@
 package org.scalatest.tools
 
 import android.app.Instrumentation
-import android.os.Bundle
 import org.scalatest._
 import dalvik.system.DexFile
 import java.io.File
 import android.test.InstrumentationTestCase
+import android.os.{Looper, Bundle}
 
 
 class SpecRunner extends SpecRunnerComponent with DefaultInstrumentationReporter
@@ -18,6 +18,7 @@ abstract class SpecRunnerComponent extends Instrumentation with InstrumentationR
   }
 
   override def onStart() {
+    Looper.prepare()
     val dexFile = new DexFile(new File(getContext.getApplicationInfo.publicSourceDir));
     val apkClassNames = dexFile.entries();
 

@@ -1,19 +1,11 @@
 <manifest package="novoda.widget.tests" xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-sdk android:minSdkVersion="10"></uses-sdk>
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-library
-            android:name="scala.library"
-            android:required="true"/>
-    <uses-library
-            android:name="scala.collection"
-            android:required="true"/>
-    <uses-library
-            android:name="scala.collection.mutable"
-            android:required="true"/>
-    <uses-library
-            android:name="scala.collection.immutable"
-            android:required="true"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <application>
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
         <uses-library android:name="android.test.runner"></uses-library>
         <activity android:name="novoda.widget.tests.ActivityStub" android:label="@string/app_name">
             <intent-filter>

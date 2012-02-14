@@ -36,7 +36,7 @@ trait TextLayoutUtil {
     span
   }
 
-  implicit def runnable(f: () => Unit): Runnable =
+  implicit def runnable(f: ()=> Unit): Runnable =
     new Runnable() {
       def run() = f()
     }
@@ -49,7 +49,7 @@ trait TextLayoutUtil {
       1.to(4).foldLeft(new SpannableStringBuilder())(
         (r: SpannableStringBuilder, letter: Int) => {
           var a = 'a'
-      
+
           letter match {
             case 2 => a = 'b'
             case 3 => a = 'c'
