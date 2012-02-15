@@ -53,17 +53,17 @@ trait ViewMatchers {
 
   def below(right: View) = new ViewBeMatcher(right) {
     def apply(left: View) = MatchResult(
-      left.getBottom >= right.getTop,
+      left.getTop >= right.getBottom,
       left.toS + " was above " + right.toS,
-      left.toS + " was below " + right.toS
+      left.toS + " was not below " + right.toS
     )
   }
 
   def above(right: View) = new ViewBeMatcher(right) {
     def apply(left: View) = MatchResult(
       left.getBottom <= right.getTop,
-      left.toS + " was below " + right.toS,
-      left.toS + " was above " + right.toS
+      left.toS + " was above " + right.toS,
+      left.toS + " was not above " + right.toS
     )
   }
 

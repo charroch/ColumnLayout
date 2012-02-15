@@ -1,4 +1,4 @@
-import android.graphics.Bitmap
+import android.graphics.{Color, Bitmap}
 import android.os.Environment
 import android.test.ActivityInstrumentationTestCase2
 import android.util.Log
@@ -15,7 +15,7 @@ import org.scalatest.WordSpec
 
 
 // http://www.scalatest.org/scaladoc/1.7.1/#org.scalatest.WordSpec@AfterWords
-class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers {
+class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with Screenshot {
 
   import ViewMatchers._
 
@@ -24,6 +24,7 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers {
 
       super.setUp()
       val t = new TextView(getActivity);
+      t.setBackgroundColor(Color.RED)
       val lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
       val t2 = new TextView(getActivity);
       t.setText("Hello World")
@@ -36,7 +37,10 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers {
           getActivity.addContentView(t2, lp)
           latch.countDown()
       }
+
       t2 should be(below(t))
+
+      take(t2)
       latch.await()
       import novoda.android.test.RichView._
       Log.i("TEST", t2.toS + " " + t.toS)
@@ -59,11 +63,20 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers {
   }
 
 
+  trait Screenshot {
+    suite: org.scalatest.Suite =>
+    def t() {
+      suite.suiteName
+    }
+  }
+
   def take(v: View) {
-    val mPath = Environment.getExternalStorageDirectory + "/" + "test.png";
+
+    val mPath = Environment.getExternalStorageDirectory + "/" + "test2.png";
+
 
     getActivity.getWindow.getDecorView.getRootView
-    val v1 =  getActivity.getWindow.getDecorView.getRootView;
+    val v1 = v.getRootView;
     v1.setDrawingCacheEnabled(true);
     val bitmap = Bitmap.createBitmap(v1.getDrawingCache());
     v1.setDrawingCacheEnabled(false);
