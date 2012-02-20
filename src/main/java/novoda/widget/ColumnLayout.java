@@ -286,7 +286,7 @@ public class ColumnLayout extends ViewGroup {
 
         public boolean hasSpaceForLayout() {
             // should add some spacing like line spacing?
-            return (height - measuredUsedHeight - getPaddingBottom() - getPaddingTop() - 15) > 0;
+            return (height - measuredUsedHeight - getPaddingBottom() - getPaddingTop()) > 0;
             //return (measuredUsedHeight < height);
         }
 

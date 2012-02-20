@@ -13,7 +13,16 @@ import novoda.widget.{TextLayoutUtil, ActivityStub}
 import org.scalatest.matchers.{MatchResult, ShouldMatchers}
 import org.scalatest.WordSpec
 
+trait Screenshot {
+  suite: org.scalatest.Suite =>
+  def t() {
+    suite.suiteName
+  }
 
+  def withScreenshot(f: MatchResult) {
+
+  }
+}
 // http://www.scalatest.org/scaladoc/1.7.1/#org.scalatest.WordSpec@AfterWords
 class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with Screenshot {
 
@@ -38,7 +47,9 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with S
           latch.countDown()
       }
 
-      t2 should be(below(t))
+    //  withScreenshot {
+        t2 should be(below(t))
+     // }
 
       take(t2)
       latch.await()
@@ -58,17 +69,7 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with S
     }
   }
 
-  def withScreenshot(file: String)(f: => MatchResult) {
 
-  }
-
-
-  trait Screenshot {
-    suite: org.scalatest.Suite =>
-    def t() {
-      suite.suiteName
-    }
-  }
 
   def take(v: View) {
 

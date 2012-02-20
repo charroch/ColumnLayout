@@ -3,7 +3,6 @@ package novoda.widget
 import android.graphics.{Typeface, Paint}
 import android.text._
 import android.text.style.TypefaceSpan
-import android.util.Log
 
 trait TextLayoutUtil {
 
@@ -36,7 +35,7 @@ trait TextLayoutUtil {
     span
   }
 
-  implicit def runnable(f: ()=> Unit): Runnable =
+  implicit def runnable(f: () => Unit): Runnable =
     new Runnable() {
       def run() = f()
     }

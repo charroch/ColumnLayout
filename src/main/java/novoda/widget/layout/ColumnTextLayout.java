@@ -3,6 +3,7 @@ package novoda.widget.layout;
 import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.util.Log;
 
 import java.util.Stack;
 
@@ -34,6 +35,7 @@ public class ColumnTextLayout {
         int firstCharPosition = getFirstChar();
         int lastLine = getLastLine(width, height);
         int nbChar = getLastChar(lastLine, width);
+        Log.i("TEST", nbChar + " < === ");
         StaticLayout columnLayout = new StaticLayout(
                 text.subSequence(firstCharPosition, firstCharPosition + nbChar),
                 textPaint,
