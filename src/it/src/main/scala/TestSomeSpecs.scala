@@ -10,7 +10,7 @@ import java.util.concurrent.CountDownLatch
 import novoda.android.test.ViewMatchers
 
 import novoda.widget.{TextLayoutUtil, ActivityStub}
-import org.scalatest.matchers.{MatchResult, ShouldMatchers}
+import org.scalatest.matchers.{Matcher, ShouldMatchers}
 import org.scalatest.WordSpec
 
 trait Screenshot {
@@ -21,14 +21,30 @@ trait Screenshot {
 
   def withScreenshot(f: MatchResult) {
 
+<<<<<<< HEAD
   }
 }
+=======
+trait Screenshot {
+  suite: org.scalatest.Suite =>
+  def t() {
+    suite.suiteName
+  }
+}
+
+>>>>>>> origin/develop
 // http://www.scalatest.org/scaladoc/1.7.1/#org.scalatest.WordSpec@AfterWords
 class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with Screenshot {
 
   import ViewMatchers._
 
   "A Columnist article" should {
+
+    "take a screenshot" in withScreenshot("test") {
+      val t = new TextView(getActivity);
+      be(below(t))
+    }
+
     "have a title" in {
 
       super.setUp()
@@ -69,6 +85,10 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with S
     }
   }
 
+<<<<<<< HEAD
+=======
+  def withScreenshot[T <: View](file: String)(f: => Matcher[T]): (=> Unit) {
+>>>>>>> origin/develop
 
 
   def take(v: View) {
