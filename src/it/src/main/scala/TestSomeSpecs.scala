@@ -1,16 +1,13 @@
-import android.graphics.{Color, Bitmap}
-import android.os.Environment
+import android.graphics.Color
 import android.test.ActivityInstrumentationTestCase2
 import android.util.Log
-import android.view.View
 import android.view.ViewGroup.LayoutParams
 import android.widget.TextView
-import java.io.{FileOutputStream, File}
 import java.util.concurrent.CountDownLatch
 import novoda.android.test.ViewMatchers
 
 import novoda.widget.{TextLayoutUtil, ActivityStub}
-import org.scalatest.matchers.{Matcher, ShouldMatchers}
+import org.scalatest.matchers.{MatchResult, ShouldMatchers}
 import org.scalatest.WordSpec
 
 trait Screenshot {
@@ -21,18 +18,9 @@ trait Screenshot {
 
   def withScreenshot(f: MatchResult) {
 
-<<<<<<< HEAD
-  }
-}
-=======
-trait Screenshot {
-  suite: org.scalatest.Suite =>
-  def t() {
-    suite.suiteName
   }
 }
 
->>>>>>> origin/develop
 // http://www.scalatest.org/scaladoc/1.7.1/#org.scalatest.WordSpec@AfterWords
 class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with Screenshot {
 
@@ -40,7 +28,7 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with S
 
   "A Columnist article" should {
 
-    "take a screenshot" in withScreenshot("test") {
+    "take a screenshot" in {
       val t = new TextView(getActivity);
       be(below(t))
     }
@@ -63,11 +51,10 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with S
           latch.countDown()
       }
 
-    //  withScreenshot {
-        t2 should be(below(t))
-     // }
+      //  withScreenshot {
+      t2 should be(below(t))
+      // }
 
-      take(t2)
       latch.await()
       import novoda.android.test.RichView._
       Log.i("TEST", t2.toS + " " + t.toS)
@@ -84,31 +71,7 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with S
       "title" should be("title")
     }
   }
-
-<<<<<<< HEAD
-=======
-  def withScreenshot[T <: View](file: String)(f: => Matcher[T]): (=> Unit) {
->>>>>>> origin/develop
-
-
-  def take(v: View) {
-
-    val mPath = Environment.getExternalStorageDirectory + "/" + "test2.png";
-
-
-    getActivity.getWindow.getDecorView.getRootView
-    val v1 = v.getRootView;
-    v1.setDrawingCacheEnabled(true);
-    val bitmap = Bitmap.createBitmap(v1.getDrawingCache());
-    v1.setDrawingCacheEnabled(false);
-    val imageFile = new File(mPath);
-    val fout = new FileOutputStream(imageFile);
-    bitmap.compress(Bitmap.CompressFormat.PNG, 90, fout);
-    fout.flush();
-    fout.close();
-  }
 }
-
 
 abstract class ViewTestCase
   extends ActivityInstrumentationTestCase2[ActivityStub](classOf[ActivityStub])

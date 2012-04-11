@@ -34,12 +34,19 @@ abstract class SpecRunnerComponent extends Instrumentation with InstrumentationR
         if (classOf[InstrumentationTestCase].isAssignableFrom(a.getClass)) {
           a.asInstanceOf[InstrumentationTestCase].injectInsrumentation(this)
         }
+
         if (classOf[AndroidTestCase].isAssignableFrom(a.getClass)) {
-          a.asInstanceOf[AndroidTestCase].setContext(this.getTargetContext)
+
           a.asInstanceOf[ {
-            def setTestContext(testContext: Context): Unit
+            def setContext(c: Context): Unit
+          }].setContext(this.getTargetContext)
+          a.asInstanceOf[ {
+            def setTestContext(c: Context): Unit
           }].setTestContext(this.getTargetContext)
+
         }
+
+
         a
       }
     )

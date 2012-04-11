@@ -4,8 +4,18 @@
 
         <attr name="columnCount" format="integer"/>
 
+        <attr name="tilingProperty" format="integer" min="0"/>
+        <attr name="tilingResource" format="color|reference"/>
+        <attr name="tileName" format="string" localization="suggested"/>
+        <attr name="tilingMode">
+            <flag name="center" value="0"/>
+            <flag name="stretched" value="1"/>
+            <flag name="repeating" value="3"/>
+        </attr>
+
         <attr name="minColumnCount" format="integer" min="1"/>
         <attr name="columnWidth" format="dimension" />
+        <attr name="paragraphStyle" format="reference" />
         <attr name="columnOffset" format="integer" value="0"/>
         <attr name="columnGap" format="dimension" value="25dp"/>
 
@@ -28,6 +38,7 @@
     <declare-styleable name="ColumnLayout_Layout">
         <attr name="layout_column" format="integer" min="0" />
         <attr name="layout_columnSpan" format="integer" min="1" />
+        <attr name="layout_noTopMargin" format="boolean" />
     </declare-styleable>
 
 </resources>

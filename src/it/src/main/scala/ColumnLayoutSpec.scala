@@ -56,8 +56,4 @@ class ColumnTextLayoutSpec extends AndroidSpec with WordSpec with ShouldMatchers
 
 }
 
-trait AndroidSpec extends AndroidTestCase {
-  //  def getTargetContext: Context = {
-  //    return classOf[AndroidTestCase].getMethod("getTargetContext", null).invoke(this, null).asInstanceOf[Context];
-  //  }
-}
+trait AndroidSpec extends AndroidTestCase
