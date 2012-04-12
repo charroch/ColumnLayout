@@ -143,6 +143,55 @@ class ColumnSpec extends AndroidSpec with WordSpec with ShouldMatchers with Text
       column2.getAvailableHeight should be(90)
     }
 
+    "span rights" in {
+
+      val spanRight = textView("Span right") {
+        (v: TextView) =>
+          v.setHeight(300)
+          val lp = new ColumnLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+          lp.columnIndex = 0
+          lp.setColumnSpan(2)
+          lp
+      }
+
+      val under = textView("under span") {
+        (v: TextView) =>
+          v.setHeight(50)
+          val lp = new ColumnLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+          lp.columnIndex = 0
+          lp
+      }
+
+      val underLeft = textView("to its right") {
+        (v: TextView) =>
+          v.setHeight(60)
+          val lp = new ColumnLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+          lp.columnIndex = 1
+          lp
+      }
+
+      val cl = new ColumnLayout(getContext)
+      cl.setText("hello")
+      val column = new cl.Column(0, 200, 500, 10, new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT))
+      column.measure(spanRight)
+      column.measuredUsedHeight should be(300)
+      column.getNext.measuredUsedHeight should be (300)
+      column.hasSpaceForLayout should be(true)
+      column.getNext.hasSpaceForLayout should be(true)
+
+      column.measure(under)
+      column.measuredUsedHeight should be(350)
+      column.getNext.measuredUsedHeight should be (300)
+      column.hasSpaceForLayout should be(true)
+      column.getNext.hasSpaceForLayout should be(true)
+
+      column.measure(underLeft)
+      column.measuredUsedHeight should be(350)
+      column.getNext.measuredUsedHeight should be (360)
+      column.hasSpaceForLayout should be(true)
+      column.getNext.hasSpaceForLayout should be(true)
+    }
+
 
     "layout" should {
       "consider margin" in {

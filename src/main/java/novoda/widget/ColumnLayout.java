@@ -408,7 +408,7 @@ public class ColumnLayout extends ViewGroup {
          * @return the available height for a view to draw in
          */
         public int getAvailableHeight() {
-            return height - measuredUsedHeight - getPaddingBottom() - getPaddingTop() - this.params.topMargin;
+            return height - measuredUsedHeight - ((measuredUsedHeight == 0) ? (this.params.topMargin + this.params.bottomMargin) : 0);
         }
 
         public void measure(View child) {
@@ -515,7 +515,7 @@ public class ColumnLayout extends ViewGroup {
                 }
 
                 //if (params.columnIndex == 3) {
-                Log.i("TEST", " Layout with =====> " + topComputed + " " + bottomComputed + " " + params.bottomMargin +" <");
+                Log.i("TEST", " Layout with =====> " + topComputed + " " + bottomComputed + " " + params.bottomMargin + " <");
 
                 int width = 0;//getWidth();
 //                if  (params.columnIndex == 3) {
@@ -564,18 +564,6 @@ public class ColumnLayout extends ViewGroup {
                 next = new Column(index + 1, width, height, gap, params);
             }
             return next;
-        }
-
-        private int getPotentialRightPadding() {
-            return getPaddingRight() * index / columnCount;
-        }
-
-        public int getComputedWith(int initialWidth) {
-            if (next != null) {
-                return next.getComputedWith(width + initialWidth);
-            } else {
-                return width + initialWidth;
-            }
         }
 
         public int getComputedColumnCount() {

@@ -21,62 +21,51 @@ abstract class SpecRunnerComponent extends Instrumentation with InstrumentationR
   override def onStart() {
     Looper.prepare()
     val dexFile = new DexFile(new File(getContext.getApplicationInfo.publicSourceDir));
-    val apkClassNames = dexFile.entries();
-
     import scala.collection.JavaConversions._
-
-    val specs = apkClassNames.filter(
-      _.endsWith("Spec")
-    ).filter(c =>
-      classOf[Suite].isAssignableFrom(getContext.getClassLoader.loadClass(c))
-    ).map(getContext.getClassLoader.loadClass(_).newInstance().asInstanceOf[Suite]).map(
-      a => {
-        if (classOf[InstrumentationTestCase].isAssignableFrom(a.getClass)) {
-          a.asInstanceOf[InstrumentationTestCase].injectInsrumentation(this)
-        }
-
-        if (classOf[AndroidTestCase].isAssignableFrom(a.getClass)) {
-
-          a.asInstanceOf[ {
-            def setContext(c: Context): Unit
-          }].setContext(this.getTargetContext)
-          a.asInstanceOf[ {
-            def setTestContext(c: Context): Unit
-          }].setTestContext(this.getTargetContext)
-
-        }
-
-
-        a
-      }
-    )
-    specs.foreach(_.run(None, this.reporter, new Stopper {}, Filter(), Map(), None, new Tracker))
+    dexFile.entries()
+      .withFilter(isSpec)
+      .withFilter(isSuite)
+      .map(asSuite)
+      .map(injectContext)
+      .map(injectInstrumentation)
+      .foreach(run)
     finish(1, new Bundle())
   }
 
-  //
-  //  trait Context[T <: Suite] {
-  //    if (classOf[AndroidTestCase].isAssignableFrom(this.getClass())) {
-  //
-  //    }
-  //  }
-  //
-  //  def injectContext(klass: Class) {
-  //    if (classOf[AndroidTestCase].isAssignableFrom(klass.getClass())) {
-  //      //        ((AndroidTestCase) test).setContext (context);
-  //      //        ((AndroidTestCase) test).setTestContext (testContext);
-  //    }
-  //  }
-
-  def injectInstrumentation() {
-    //  private void setInstrumentationIfInstrumentationTestCase (
-    //    Test test, Instrumentation instrumentation) {
-    //    if (InstrumentationTestCase.class.isAssignableFrom (test.getClass () ) ) {
-    //      ((InstrumentationTestCase) test).injectInstrumentation (instrumentation);
-    //
-    //    }
+  def run(s: Suite) {
+    s.run(None, this.reporter, new Stopper {}, Filter(), Map(), None, new Tracker)
   }
 
+  def isSuite(klass: String) = {
+    classOf[Suite].isAssignableFrom(getContext.getClassLoader.loadClass(klass))
+  }
+
+  def asSuite(klass: String): Suite = {
+    getContext.getClassLoader.loadClass(klass).newInstance().asInstanceOf[Suite]
+  }
+
+  def isSpec(klass: String): Boolean = {
+    klass.endsWith("Spec") || klass.endsWith("Specs")
+  }
+
+  def injectInstrumentation(s: Suite) = {
+    if (classOf[InstrumentationTestCase].isAssignableFrom(s.getClass)) {
+      s.asInstanceOf[InstrumentationTestCase].injectInsrumentation(this)
+    }
+    s
+  }
+
+  def injectContext(s: Suite) = {
+    if (classOf[AndroidTestCase].isAssignableFrom(s.getClass)) {
+      s.asInstanceOf[ {
+        def setContext(c: Context): Unit
+      }].setContext(this.getTargetContext)
+      s.asInstanceOf[ {
+        def setTestContext(c: Context): Unit
+      }].setTestContext(this.getTargetContext)
+    }
+    s
+  }
 
 }
 

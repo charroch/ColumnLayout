@@ -10,12 +10,11 @@ import novoda.widget.layout.ColumnTextLayout;
 public class FlowableTextView extends TextView {
 
     FlowableTextView next;
-
     FlowableTextView root;
 
     CharSequence originalText;
-
     CharSequence laidText;
+
     private boolean isInitiated = false;
 
     public FlowableViewFactory getViewFactory() {

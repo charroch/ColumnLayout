@@ -25,7 +25,7 @@ class ColumnTextLayoutSpec extends AndroidSpec with WordSpec with ShouldMatchers
       val column = cl.next(100, 100)
       column.getText should not be ("\u25A0");
 
-      // cl.next(5000, 10000).getText should be ("\u25A0")
+      cl.next(5000, 10000).getText should be("\u25A0")
     }
 
     "hum" in {
@@ -46,14 +46,13 @@ class ColumnTextLayoutSpec extends AndroidSpec with WordSpec with ShouldMatchers
 
       c1.getText.toString should not include ("■")
       c2.getText should be("\u25A0")
+
     }
   }
-
 
   def bitmap(file: String): Bitmap = {
     BitmapFactory.decodeStream(getContext.getAssets().open(file));
   }
-
 }
 
 trait AndroidSpec extends AndroidTestCase
