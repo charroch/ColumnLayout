@@ -90,19 +90,3 @@ trait ViewMatchers {
 }
 
 object ViewMatchers extends ViewMatchers
-
-//
-//trait ViewSpec extends BeforeAndAfter {
-//  a: ActivityTestCase =>
-//  def setUp() {
-//    a.setUp()
-//    implicit val context = getActivity.getApplicationContext
-//  }
-//
-//  def against(layoutCreation: () => View)(v: (Activity, View) => MatchResult) {
-//    v(getActivity, layoutCreation())
-//  }
-//}
-//
-//object ViewSpec extends ActivityInstrumentationTestCase2[ActivityStub](classOf[ActivityStub]) with ViewSpec
-//

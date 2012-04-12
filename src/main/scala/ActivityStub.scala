@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory
 import android.widget.{ImageView, TextView}
 import android.support.v4.view.PagerAdapter
 import android.view.{ViewGroup, View}
-import android.app.Activity._
 
 class ActivityStub extends Activity {
 
@@ -39,7 +38,7 @@ class SimpleTextColumn2 extends Activity {
 
       override def instantiateItem(container: ViewGroup, position: Int) = {
         val layout = new ColumnLayout(context)
-       // layout.setPage(position)
+        // layout.setPage(position)
         layout.setColumnCount(3)
         val textView = new TextView(context)
         val tv2 = new TextView(context)
@@ -100,8 +99,8 @@ class SimpleTextColumn extends Activity {
     super.onCreate(bundle);
     val layout = new ColumnLayout(this)
     layout.setColumnCount(3)
-//    layout.setColumnWidth(250)
-//    layout.setColumnGap(25)
+    //    layout.setColumnWidth(250)
+    //    layout.setColumnGap(25)
 
     val textView = new TextView(this)
     val tv2 = new TextView(this)

@@ -60,6 +60,7 @@ abstract class SpecRunnerComponent extends Instrumentation with InstrumentationR
       s.asInstanceOf[ {
         def setContext(c: Context): Unit
       }].setContext(this.getTargetContext)
+
       s.asInstanceOf[ {
         def setTestContext(c: Context): Unit
       }].setTestContext(this.getTargetContext)

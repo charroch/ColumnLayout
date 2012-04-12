@@ -50,6 +50,14 @@ class ColumnTextLayoutSpec extends AndroidSpec with WordSpec with ShouldMatchers
     }
   }
 
+  "A 2 column layout" should {
+
+    "measure the text correctly" in {
+
+    }
+
+  }
+
   def bitmap(file: String): Bitmap = {
     BitmapFactory.decodeStream(getContext.getAssets().open(file));
   }

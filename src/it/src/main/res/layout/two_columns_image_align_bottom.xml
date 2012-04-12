@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<novoda.widget.ColumnLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:column="http://schemas.android.com/apk/res/novoda.widget"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+</novoda.widget.ColumnLayout>

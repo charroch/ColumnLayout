@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch
 import novoda.android.scala.Screenshots
 import novoda.android.test.ViewMatchers
 
+import novoda.widget.tests.R
 import novoda.widget.{TextLayoutUtil, ActivityStub}
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.WordSpec
@@ -21,6 +22,16 @@ class TestSomeSpec extends ViewTestCase with WordSpec with ShouldMatchers with S
     "take a screenshot" in {
       val t = new TextView(getActivity);
       be(below(t))
+    }
+
+    "fef " in {
+      super.setUp()
+      getInstrumentation.getContext.getResources.getDrawable(novoda.widget.R.drawable.image)
+      runTestOnUiThread {
+        () =>
+          getActivity.setContentView(R.layout.two_columns_image_align_bottom)
+          //latch.countDown()
+      }
     }
 
     "have a title" in {
