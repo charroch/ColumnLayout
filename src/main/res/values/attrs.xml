@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <declare-styleable name="FlowableTextView">
+        <attr name="index" format="integer"/>
+        <attr name="next" format="reference"/>
+    </declare-styleable>
+
     <declare-styleable name="ColumnLayout">
 
         <attr name="columnCount" format="integer"/>
@@ -14,8 +20,8 @@
         </attr>
 
         <attr name="minColumnCount" format="integer" min="1"/>
-        <attr name="columnWidth" format="dimension" />
-        <attr name="paragraphStyle" format="reference" />
+        <attr name="columnWidth" format="dimension"/>
+        <attr name="paragraphStyle" format="reference"/>
         <attr name="columnOffset" format="integer" value="0"/>
         <attr name="columnGap" format="dimension" value="25dp"/>
 
@@ -36,9 +42,9 @@
     </declare-styleable>
 
     <declare-styleable name="ColumnLayout_Layout">
-        <attr name="layout_column" format="integer" min="0" />
-        <attr name="layout_columnSpan" format="integer" min="1" />
-        <attr name="layout_noTopMargin" format="boolean" />
+        <attr name="layout_column" format="integer" min="0"/>
+        <attr name="layout_columnSpan" format="integer" min="1"/>
+        <attr name="layout_noTopMargin" format="boolean"/>
     </declare-styleable>
 
 </resources>

@@ -1,4 +1,4 @@
-package novoda.widget
+package novoda.widget.tests
 
 import android.test.ActivityInstrumentationTestCase2
 import android.view.ViewGroup.LayoutParams
@@ -8,6 +8,7 @@ import novoda.android.test.ViewMatchers
 import android.widget.{ImageView, TextView}
 import android.content.Context
 import android.widget.ImageView.ScaleType
+import novoda.widget.{ColumnLayout, TextLayoutUtil}
 
 
 class ColumnLayoutTest extends ActivityInstrumentationTestCase2[ActivityStub](classOf[ActivityStub])

@@ -2,7 +2,8 @@ package novoda.android.scala
 
 import android.test.ActivityInstrumentationTestCase2
 import novoda.android.test.ViewMatchers
-import novoda.widget.{ColumnLayout, TextLayoutUtil, ActivityStub}
+import novoda.widget.tests.ActivityStub
+import novoda.widget.{ColumnLayout, TextLayoutUtil}
 import android.view.ViewGroup.LayoutParams
 import java.util.concurrent.{TimeUnit, CountDownLatch}
 import org.scalatest.matchers.ShouldMatchers
@@ -31,7 +32,7 @@ class ViewMeasureSpec extends ActivitySpec {
       view.getHeight should be(230)
       view.getMeasuredHeight should be(230)
 
-      lp.setMargins(0,25,0,25);
+      lp.setMargins(0, 25, 0, 25);
       val latch2 = new CountDownLatch(1)
       runTestOnUiThread(() => {
         getActivity.setContentView(view, lp)

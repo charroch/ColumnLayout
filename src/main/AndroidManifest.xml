@@ -13,10 +13,7 @@
 
         <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-        <activity android:label="@string/app_name" android:name=".ActivityStub">
-        </activity>
-
-        <activity android:label="SimpleTextColumn" android:name=".SimpleTextColumn">
+        <activity android:label="SimpleTextColumn" android:name=".FlowableTextViewActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

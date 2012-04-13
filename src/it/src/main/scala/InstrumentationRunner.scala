@@ -7,6 +7,7 @@ import java.io.File
 import android.os.{Looper, Bundle}
 import android.test.{AndroidTestCase, InstrumentationTestCase}
 import android.content.Context
+import scala.collection.JavaConversions._
 
 
 class SpecRunner extends SpecRunnerComponent with DefaultInstrumentationReporter
@@ -21,7 +22,6 @@ abstract class SpecRunnerComponent extends Instrumentation with InstrumentationR
   override def onStart() {
     Looper.prepare()
     val dexFile = new DexFile(new File(getContext.getApplicationInfo.publicSourceDir));
-    import scala.collection.JavaConversions._
     dexFile.entries()
       .withFilter(isSpec)
       .withFilter(isSuite)

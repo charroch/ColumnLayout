@@ -22,6 +22,7 @@ object General {
       AndroidProject.androidSettings ++
       TypedResources.settings ++ Seq(
       useProguard in Android := false,
+      libraryDependencies += "com.google.android" % "support-v4" % "r6",
       fullClasspath in Test ~= {
         (cp: Classpath) =>
           cp.sortWith((a, b) => !a.data.toString.contains("android"))

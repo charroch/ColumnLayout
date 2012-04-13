@@ -9,8 +9,8 @@ import novoda.widget.layout.ColumnTextLayout;
 
 public class FlowableTextView extends TextView {
 
-    FlowableTextView next;
     FlowableTextView root;
+    FlowableTextView next;
 
     CharSequence originalText;
     CharSequence laidText;
@@ -52,6 +52,7 @@ public class FlowableTextView extends TextView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
+
 
         if (layout == null && getText() != null) {
             layout = new ColumnTextLayout(getText(), getPaint());
