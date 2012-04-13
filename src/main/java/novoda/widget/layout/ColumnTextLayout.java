@@ -4,6 +4,7 @@ import android.graphics.Rect;
 import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.util.Log;
 
 import java.util.Stack;
 
@@ -31,7 +32,7 @@ public class ColumnTextLayout {
         return text;
     }
 
-    public Column next(int width, int height) {
+    synchronized public Column next(int width, int height) {
         int firstCharPosition = getFirstChar();
         int lastLine = getLastLine(width, height);
         int nbChar = getLastChar(lastLine, width);
@@ -91,5 +92,16 @@ public class ColumnTextLayout {
         return new StaticLayout(
                 text.subSequence(fromChar, text.length()), textPaint, width, Alignment.ALIGN_NORMAL, 1,
                 1, true);
+    }
+
+    synchronized public void setCurrentColumn(Column column) {
+        int index = columns.indexOf(column);
+        int size = columns.size();
+        int removeNb = size - index;
+        if (removeNb > 0) {
+            for (int i = 0; i < removeNb; i++) {
+                columns.remove(index + i);
+            }
+        }
     }
 }
