@@ -100,7 +100,7 @@ public class ColumnTextLayout {
         int removeNb = size - index;
         if (removeNb > 0) {
             for (int i = 0; i < removeNb; i++) {
-                columns.remove(index + i);
+                columns.remove(index + ibasinic);
             }
         }
     }
