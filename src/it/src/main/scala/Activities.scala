@@ -1,78 +1,44 @@
-package novoda.widget
-
-;
+package novoda.widget.tests.activities
 
 import android.app.Activity
 import android.os.Bundle
-import android.graphics.Color
-import layout.ColumnTextLayout
-import novoda.widget.ColumnLayout.LayoutParams
-import android.widget.{TextView, RelativeLayout}
-import android.view.View.OnClickListener
-import android.view.{View, ViewGroup}
+import novoda.widget.tests.{ActivityStub, R}
+import org.scalatest.WordSpec
+import org.scalatest.matchers.ShouldMatchers
+import android.test.InstrumentationTestCase
+import android.content.Intent
+import novoda.widget.ColumnLayout
 
-class FlowableTextViewActivity extends Activity {
-
+class TwoColumnHeaderSpan extends Activity {
   override def onCreate(b: Bundle) {
-    super.onCreate(b)
-
-    val ctl = new ColumnTextLayout(ipsum, new TextView(this).getPaint)
-
-    val rl = new RelativeLayout(this)
-
-    val f1 = new FlowableTextView(this)
-    f1.setOriginalText(ipsum)
-    f1.setBackgroundColor(Color.RED)
-    f1.setLayout(ctl)
-    f1.setHeight(200)
-    f1.setRoot(true)
-
-    val f2 = new FlowableTextView(this)
-    f2.setRoot(false)
-    f2.setBackgroundColor(Color.GREEN)
-    f1.setNextFlowableTextView(f2)
-
-    val f3 = new FlowableTextView(this)
-    f3.setBackgroundColor(Color.CYAN)
-    f2.setNextFlowableTextView(f3)
-
-    val lp3 = new RelativeLayout.LayoutParams(500, 250)
-    lp3.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-    f3.setLayoutParams(lp3)
-
-    val lp1 = new RelativeLayout.LayoutParams(200, 250)
-    lp1.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-    f1.setLayoutParams(lp1)
-
-
-    val lp = new RelativeLayout.LayoutParams(200, 100)
-    lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-    f2.setLayoutParams(lp)
-
-    rl.addView(f3)
-    rl.addView(f1)
-    rl.addView(f2)
-
-    f3.setOnClickListener(oc)
-    f2.setOnClickListener(oc)
-    f1.setOnClickListener(oc)
-
-    setContentView(rl)
-
+    setContentView(R.layout.two_columns_header_span)
   }
+}
 
-  val oc = new OnClickListener {
-    def onClick(p1: View) {
-      val lp = p1.getLayoutParams
-      lp.height *= 2
-      p1.setLayoutParams(lp)
-      p1.invalidate()
+
+class TwoColumnHeaderSpanSpec extends StubActivityTest {
+
+  "it should start the activity" should {
+    "test it " in {
+      val in = new Intent(getInstrumentation.getContext, classOf[ActivityStub])
+      in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      val activity = getInstrumentation.startActivitySync(in)
+      runTestOnUiThread(new Runnable() {
+        def run() {
+
+          //setUp()
+          activity.setContentView(R.layout.two_columns_header_span)
+          activity.findViewById(R.id.column_layout).asInstanceOf[ColumnLayout].setText(ipsum)
+          activity.findViewById(R.id.column_layout).invalidate()
+        }
+      })
+      getInstrumentation.waitForIdleSync()
+
+      //tearDown();
+      val columnLayout = activity.findViewById(R.id.column_layout).asInstanceOf[ColumnLayout]
+      columnLayout.getChildCount should be(5)
+      columnLayout.getChildAt(2).getHeight should be(150)
     }
-  }
-
-
-  def rl = {
-    val rl = new RelativeLayout(this)
   }
 
   lazy val ipsum =
@@ -83,3 +49,7 @@ class FlowableTextViewActivity extends Activity {
     |Morbi iaculis iaculis est, id volutpat lorem viverra auctor. Donec urna tellus, dignissim vel pellentesque sed, eleifend nec diam. Vivamus condimentum justo tellus, eu dignissim nulla. Nam sed urna dapibus lorem vulputate tincidunt ac vitae lacus. Fusce eu risus nibh. Suspendisse fringilla accumsan nulla sed sagittis. Cras in tortor nec elit blandit semper non sed ante. Phasellus tellus risus, volutpat sed vehicula ac, congue id ligula. Nulla facilisi. Duis sed elit elit, a commodo dolor. Morbi accumsan felis sit amet arcu varius sed eleifend mauris fermentum.
     """.stripMargin
 }
+
+class StubActivityTest
+  extends InstrumentationTestCase
+  with WordSpec with ShouldMatchers

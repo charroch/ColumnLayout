@@ -17,7 +17,6 @@ public class ColumnLayout extends ViewGroup {
     private int columnCount;
     private float columnWidth;
     private float columnGap;
-    private int paragraphStyle;
 
     private Column first;
 
@@ -26,6 +25,22 @@ public class ColumnLayout extends ViewGroup {
     private static final float DEFAULT_COLUMN_GAP = 25.0f;
     private static final float DEFAULT_COLUMN_WIDTH = 300.0f;
     int fullWidth;
+
+    private int pages;
+
+    private int computedPageCount;
+
+    private int page;
+
+    public int maxColumn;
+
+    private int textSize;
+    private boolean nightMode;
+    private static final boolean DEBUG = false;
+    private boolean isEmpty = true;
+    private int height;
+    private boolean firstRun = true;
+    private FlowableTextView root;
 
     public int getColumnCount() {
         return columnCount;
@@ -66,27 +81,48 @@ public class ColumnLayout extends ViewGroup {
             setColumnCount(a.getInt(R.styleable.ColumnLayout_columnCount, 1));
             setColumnGap(a.getDimension(R.styleable.ColumnLayout_columnGap, DEFAULT_COLUMN_GAP));
             setColumnWidth(a.getDimension(R.styleable.ColumnLayout_columnWidth, DEFAULT_COLUMN_WIDTH));
-            setParagraphStyle(a.getResourceId(R.styleable.ColumnLayout_paragraphStyle, -1));
         } finally {
             a.recycle();
         }
     }
 
+    public TextView getStyledTextView() {
+        TextView view = new TextView(getContext());
+        view.setTextSize(textSize);
+        return view;
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+    }
+
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
+        //removeAllViews();
         int width = MeasureSpec.getSize(widthSpec);
         int height = MeasureSpec.getSize(heightSpec);
-
         fullWidth = width;
-        int widthMode = MeasureSpec.getMode(widthSpec);
-
-
         int columnWidth = computeColumnWidth(width);
 
         first = new Column(0, columnWidth, height, (int) getColumnGap(), getColumnMargin());
 
+//        if (getChildCount() == 0) {
+//            first.fillIn(columnTextLayout);
+//        }
+
         for (int i = 0, N = getChildCount(); i < N; i++) {
             first.measure(getChildAt(i));
+        }
+
+//        if (firstRun) {
+//            first.fillIn(new ColumnTextLayout(text, getStyledTextView().getPaint()));
+//            firstRun = false;
+//        }
+
+        if (columnTextLayout != null) {
+            Log.i("TEST", "FIRST FILL IN!!!");
+            first.fillIn();
         }
 
         int hPadding = getPaddingLeft() + getPaddingRight();
@@ -95,33 +131,36 @@ public class ColumnLayout extends ViewGroup {
         int measuredWidth = Math.max(hPadding + width, getSuggestedMinimumWidth());
         int measuredHeight = Math.max(vPadding + height, getSuggestedMinimumHeight());
 
-        int pages = (int) Math.ceil(first.getComputedColumnCount() / getColumnCount()) + 1;
-
+        pages = (int) Math.ceil(first.getComputedColumnCount() / getColumnCount()) + 1;
         int layoutWidth = pages * width;
-
         int a = makeMeasureSpec(layoutWidth, MeasureSpec.UNSPECIFIED);
 
+        if (DEBUG) {
+            android.util.Log.d(this.toString(), String.format("ComputedView: h:%d, w:%d", height, width));
+        }
+
         setMeasuredDimension(
-                //resolveSizeAndState(layoutWidth, a, 0),
-                resolveSizeAndState(width, widthSpec, 0),
-                resolveSizeAndState(height, heightSpec, 0)
+                resolveSizeAndState(measuredWidth, widthSpec, 0),
+                resolveSizeAndState(measuredHeight, heightSpec, 0)
         );
     }
 
     private MarginLayoutParams getColumnMargin() {
         int width = makeMeasureSpec((int) getColumnWidth(), MeasureSpec.UNSPECIFIED);
         MarginLayoutParams params = new MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        params.setMargins(20, 20, 20, 20);
+        // params.setMargins(20, 20, 20, 20);
         return params;
     }
 
+    public int getPageCount() {
+        return computedPageCount;
+    }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         for (int i = 0, N = getChildCount(); i < N; i++) {
             first.layout(getChildAt(i), left, top, right, bottom);
         }
-        first.fillIn(columnTextLayout);
     }
 
 
@@ -137,44 +176,6 @@ public class ColumnLayout extends ViewGroup {
         }
     }
 
-    class Page2 extends ViewGroup {
-        private final ColumnLayout l;
-
-        public Page2(Context context, ColumnLayout l) {
-            super(context);
-            this.l = l;
-        }
-
-        @Override
-        protected void onMeasure(int widthSpec, int heightSpec) {
-            l.onMeasure(widthSpec, heightSpec);
-            setMeasuredDimension(l.getMeasuredWidthAndState(), l.getMeasuredHeightAndState());
-            super.onMeasure(widthSpec, heightSpec);
-        }
-
-        @Override
-        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-            l.onLayout(changed, left, top, right, bottom);
-        }
-    }
-
-
-    public ViewGroup getPage() {
-
-        Page2 p = new Page2(getContext(), this);
-        int cc = getChildCount();
-        for (int i = 0; i < cc; i++) {
-            View v = getChildAt(i);
-            if (v != null) {
-                int ci = getLayoutParams(v).columnIndex;
-                if (ci < 3) {
-                    removeView(v);
-                    p.addView(v);
-                }
-            }
-        }
-        return p;
-    }
 
     private LayoutParams getLayoutParams(View c) {
         ViewGroup.LayoutParams p = c.getLayoutParams();
@@ -206,26 +207,40 @@ public class ColumnLayout extends ViewGroup {
     @Override
     public void addView(View child) {
         super.addView(child);
+        estimatePageCount(child);
     }
 
     @Override
     public void addView(View child, int index) {
         super.addView(child, index);
+        estimatePageCount(child);
     }
 
     @Override
     public void addView(View child, int width, int height) {
         super.addView(child, width, height);
+        estimatePageCount(child);
     }
 
     @Override
     public void addView(View child, ViewGroup.LayoutParams params) {
         super.addView(child, params);
+        estimatePageCount(child);
     }
 
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
         super.addView(child, index, params);
+        estimatePageCount(child);
+    }
+
+    private void estimatePageCount(View child) {
+        int columnIndex = getLayoutParams(child).columnIndex;
+        int columnCount = getColumnCount();
+        int pageCount = (columnIndex / columnCount) + 1;
+        if (pageCount > computedPageCount) {
+            computedPageCount = pageCount;
+        }
     }
 
     @Override
@@ -247,22 +262,16 @@ public class ColumnLayout extends ViewGroup {
 
     public void setText(CharSequence text) {
         this.text = text;
-        TextView v = new TextView(this.getContext());
-        if (getParagraphStyle() != -1) {
-            v.setTextAppearance(getContext(), getParagraphStyle());
-        }
-        columnTextLayout = new ColumnTextLayout(text, v.getPaint());
+        columnTextLayout = new ColumnTextLayout(text, getStyledTextView().getPaint());
+        invalidate();
+        requestLayout();
     }
 
-    public int getParagraphStyle() {
-        return paragraphStyle;
+    public void setPage(int page) {
+        this.page = page;
     }
 
-    public void setParagraphStyle(int paragraphStyle) {
-        this.paragraphStyle = paragraphStyle;
-    }
-
-    public static class LayoutParams extends ViewGroup.MarginLayoutParams {
+    public static class LayoutParams extends MarginLayoutParams {
 
         public static final int ALIGN_PARENT_BOTTOM = 1;
         public static final int ALIGN_PARENT_TOP = 2;
@@ -291,7 +300,7 @@ public class ColumnLayout extends ViewGroup {
             super(source);
         }
 
-        public LayoutParams(ViewGroup.MarginLayoutParams source) {
+        public LayoutParams(MarginLayoutParams source) {
             super(source);
         }
 
@@ -325,34 +334,12 @@ public class ColumnLayout extends ViewGroup {
         }
     }
 
-    final class Page extends ViewGroup {
-
-        private Page next;
-
-        private Column column;
-
-        public Page(Context context, Column column) {
-            super(context);
-            this.column = column;
-        }
-
-        @Override
-        public void onLayout(boolean changed, int left, int top, int right, int bottom) {
-            int childCount = getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                column.layout(getChildAt(i), left, top, right, bottom);
-            }
-        }
-    }
-
-    Page page;
-
-    public final class Column {
+    final class Column {
         private final int index, width, height, gap;
 
         private final MarginLayoutParams params;
 
-        public int measuredUsedHeight, layoutCurrentBottom;
+        int measuredUsedHeight, layoutCurrentBottom;
 
         private int offsetTop, offsetBottom, currentTop;
 
@@ -376,6 +363,28 @@ public class ColumnLayout extends ViewGroup {
             return getAvailableHeight() > columnTextLayout.getTextHeight();
         }
 
+        public void fillIn() {
+            if (hasSpaceForLayout()) {
+                //add view
+                FlowableTextView view = new FlowableTextView(getContext());
+                view.setLayout(columnTextLayout);
+                if (root == null) {
+                    view.setRoot(true);
+                    root = view;
+                }
+
+                LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
+                params.setColumn(index);
+                addView(view, params);
+                requestLayout();
+                Log.i("TEST", view.getMeasuredHeight() + " <===============================> " + view.getMeasuredWidth());
+
+                //view.setRoot();
+            } else {
+                getNext().fillIn();
+            }
+        }
+
         public void fillIn(ColumnTextLayout with) {
             if (with != null && with.hasNext()) {
                 if (hasSpaceForLayout()) {
@@ -387,20 +396,17 @@ public class ColumnLayout extends ViewGroup {
         }
 
         private void append(ColumnTextLayout with) {
-            novoda.widget.layout.Column c = with.next(width, getAvailableHeight());
-            int l = c.getText().length();
+            int height = getAvailableHeight();
+            // TODO need to figure out exactly why this works...
+            height -= (this.params.topMargin + this.params.bottomMargin) * 2;
+            novoda.widget.layout.Column c = with.next(width, height);
 
-            TextView view = new TextView(getContext());
-
-            if (getParagraphStyle() != -1) {
-                view.setTextAppearance(getContext(), getParagraphStyle());
-            }
-
+            TextView view = getStyledTextView();
             view.setText(c.getText());
             LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.setColumn(index);
+            maxColumn = index;
             addView(view, params);
-
             getNext().fillIn(with);
         }
 
@@ -408,17 +414,26 @@ public class ColumnLayout extends ViewGroup {
          * @return the available height for a view to draw in
          */
         public int getAvailableHeight() {
+//            return height - measuredUsedHeight - getPaddingBottom() - getPaddingTop();// - this.params.topMargin;
             return height - measuredUsedHeight - ((measuredUsedHeight == 0) ? (this.params.topMargin + this.params.bottomMargin) : 0);
         }
 
+        final boolean isGone(View c) {
+            return c.getVisibility() == View.GONE;
+        }
+
         public void measure(View child) {
-
             LayoutParams params = getLayoutParams(child);
-
             if (params.columnIndex == index) {
+
                 if (measuredUsedHeight == 0) {
                     measuredUsedHeight += this.params.topMargin;
+                    measuredUsedHeight += this.params.bottomMargin;
                 }
+
+                if (DEBUG) android.util.Log.d(ColumnLayout.class.getSimpleName(), debugView(child)
+                        + String.format("container view with h: %d, w: %d", getMeasuredHeight(), getMeasuredWidth()));
+
                 int spannedWidth = width * params.columnsSpan + (params.columnsSpan - 1) * gap;
 
                 final int columnWidthSpec = makeMeasureSpec(spannedWidth, MeasureSpec.AT_MOST);
@@ -439,15 +454,30 @@ public class ColumnLayout extends ViewGroup {
 
                 child.measure(childWidthSpec, childHeightSpec);
 
-
+                /*
                 measuredUsedHeight += child.getMeasuredHeight();
                 measuredUsedHeight += getPaddingBottom();
+                */
+
+                measuredUsedHeight += child.getMeasuredHeight();
                 measuredUsedHeight += params.bottomMargin;
                 measuredUsedHeight += params.topMargin;
 
                 if (params.columnsSpan > 1) {
-                    spanMeasuredRight(params.columnsSpan, child.getMeasuredHeight(), params);
+                    if (params.alignment == LayoutParams.ALIGN_PARENT_BOTTOM) {
+                        int height = child.getMeasuredHeight();
+                        height += params.bottomMargin;
+                        height += params.topMargin;
+                        height += this.params.topMargin;
+                        spanMeasuredRight(params.columnsSpan, height, params);
+                    } else {
+                        spanMeasuredRight(params.columnsSpan, measuredUsedHeight /*child.getMeasuredHeight()*/, params);
+                    }
                 }
+
+                if (DEBUG) android.util.Log.d(ColumnLayout.class.getSimpleName(), debugView(child)
+                        + String.format("measure with h: %d, w: %d", child.getMeasuredHeight(), child.getMeasuredWidth()));
+
             } else {
                 getNext().measure(child);
             }
@@ -457,36 +487,26 @@ public class ColumnLayout extends ViewGroup {
             return height - measuredUsedHeight - ((isTopOnPage()) ? this.params.topMargin : 0);
         }
 
-
         private void spanMeasuredRight(int spansNbColumn, int measuredHeight, LayoutParams params) {
             if (spansNbColumn == 1) {
-
             } else {
-
-//                if (params.alignment == LayoutParams.ALIGN_PARENT_BOTTOM) {
-//                      getNext().offsetBottom = measuredHeight;
-//                } else {
-
                 if (params.height == LayoutParams.FILL_PARENT) {
                     getNext().filled = true;
                 }
-                getNext().measuredUsedHeight += measuredHeight;
+                getNext().measuredUsedHeight = measuredHeight;
                 getNext().spanMeasuredRight(spansNbColumn - 1, measuredHeight, params);
-
-//                }
             }
         }
 
         public void layout(View child, int l, int t, int r, int b) {
             LayoutParams params = getLayoutParams(child);
             if (params.columnIndex == index) {
-
-
                 int left = this.getLeft();
                 /**
                  * Takes into account spanning over several columns
                  */
                 int right = left + (width * params.columnsSpan) + (params.columnsSpan - 1) * gap;
+
 
                 int top = this.getTop(t);
 
@@ -514,15 +534,17 @@ public class ColumnLayout extends ViewGroup {
                     topComputed = top;
                 }
 
-                //if (params.columnIndex == 3) {
-                Log.i("TEST", " Layout with =====> " + topComputed + " " + bottomComputed + " " + params.bottomMargin + " <");
+                int w = getMeasuredWidth();
+                int offset = 0;
+                if (page > 0) {
+                    offset += w * page;
+                }
 
-                int width = 0;//getWidth();
-//                if  (params.columnIndex == 3) {
-//                    width += getWidth()/3;
-//                }
-                child.layout(left + width, topComputed, right + width, bottomComputed);
-                //}
+                //  left * (w * page), top, right * (width * page),
+                child.layout(left - offset, topComputed, right - offset, bottomComputed);
+
+                if (DEBUG) android.util.Log.d(ColumnLayout.class.getSimpleName(), debugView(child)
+                        + String.format("layout with h: %d, w: %d", bottomComputed - topComputed, right - left));
 
                 if (params.alignment == LayoutParams.ALIGN_PARENT_BOTTOM) {
 
@@ -566,6 +588,18 @@ public class ColumnLayout extends ViewGroup {
             return next;
         }
 
+        private int getPotentialRightPadding() {
+            return getPaddingRight() * index / columnCount;
+        }
+
+        public int getComputedWith(int initialWidth) {
+            if (next != null) {
+                return next.getComputedWith(width + initialWidth);
+            } else {
+                return width + initialWidth;
+            }
+        }
+
         public int getComputedColumnCount() {
             if (next != null) {
                 return next.getComputedColumnCount();
@@ -575,6 +609,7 @@ public class ColumnLayout extends ViewGroup {
         }
 
         public int getTop(int top) {
+            // THIS IS THE CULPRIT!!
             return top + getPaddingTop() + offsetTop + ((offsetTop == 0) ? this.params.topMargin : 0);
         }
 
@@ -631,10 +666,27 @@ public class ColumnLayout extends ViewGroup {
             return false;
         }
 
+        @Override
+        public String toString() {
+            return "Column{" +
+                    "index=" + index +
+                    ", width=" + width +
+                    ", height=" + height +
+                    ", gap=" + gap +
+                    ", params=" + params +
+                    ", measuredUsedHeight=" + measuredUsedHeight +
+                    ", layoutCurrentBottom=" + layoutCurrentBottom +
+                    ", offsetTop=" + offsetTop +
+                    ", offsetBottom=" + offsetBottom +
+                    ", currentTop=" + currentTop +
+                    ", filled=" + filled +
+                    ", next=" + next +
+                    ", isTopOnPage=" + isTopOnPage +
+                    '}';
+        }
     }
 
     private int getPageMarginRight() {
         return -1;
     }
 }
-

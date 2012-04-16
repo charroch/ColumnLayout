@@ -43,7 +43,8 @@ object AndroidBuild extends Build {
     settings = General.settings ++ AndroidTest.androidSettings ++ AndroidTest.settings ++ Seq(
       useProguard in Android := false,
       libraryDependencies ++= Seq(
-        "org.scalatest" %% "scalatest" % "1.8-SNAPSHOT"
+        "org.scalatest" %% "scalatest" % "1.8-SNAPSHOT",
+        "com.google.android" % "support-v4" % "r6"
       ),
       instrumentationRunner in Android := "org.scalatest.tools.SpecRunner",
       dxInputs in Android ~= {

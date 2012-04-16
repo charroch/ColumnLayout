@@ -133,7 +133,7 @@ class SimpleTextColumn extends Activity {
     tv3.setText(ipsum)
 
     layout.addView(textView, lp);
-    layout.addView(imageView, lp3);
+    layout.addView(imageView, lp3);                                            class TwoColumnHeaderSpanSpec
     layout.addView(tv2, lp2);
     layout.addView(tv3, lp4);
 
@@ -145,9 +145,9 @@ class SimpleTextColumn extends Activity {
     layout.addView(tv4, lp5)
     //layout.setPage(1)
 
-    layout2.setAdapter(new ArticlePageAdapter(this, layout))
+    //layout2.setAdapter(new ArticlePageAdapter(this, layout))
 
-    setContentView(layout.getPage)
+    setContentView(layout)
 
 
     //setContentView(layout);

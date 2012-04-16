@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<novoda.widget.ColumnLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:column="http://schemas.android.com/apk/res-auto"
+        column:columnCount="2"
+        column:columnWidth="200dp"
+        android:id="@+id/column_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            column:layout_column="0"
+            column:layout_columnSpan="2">
+
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="fill_parent"
+                  android:text="Header View"/>
+    </LinearLayout>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              column:layout_column="0"
+              android:text="Column 1"/>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              column:layout_column="1"
+              android:text="Column 2"/>
+</novoda.widget.ColumnLayout>

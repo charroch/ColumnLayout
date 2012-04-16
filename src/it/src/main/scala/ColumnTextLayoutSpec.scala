@@ -1,80 +1,25 @@
-package novoda.widget
+import android.test.AndroidTestCase
+import android.text.TextPaint
+import novoda.widget.layout.ColumnTextLayout
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.WordSpec
 
-;
+class ColumnTextLayoutSpec2 extends AndroidTestCase with ShouldMatchers with WordSpec {
 
-import android.app.Activity
-import android.os.Bundle
-import android.graphics.Color
-import layout.ColumnTextLayout
-import novoda.widget.ColumnLayout.LayoutParams
-import android.widget.{TextView, RelativeLayout}
-import android.view.View.OnClickListener
-import android.view.{View, ViewGroup}
+  "A flowable text" should {
+    "keep track of columns" in {
+      val flowableText = new ColumnTextLayout(ipsum, new TextPaint)
+      val col1 = flowableText.next(50, 20)
+      val col2 = flowableText.next(50, 20)
+      val col3 = flowableText.next(50, 20)
+      val col4 = flowableText.next(50, 20)
 
-class FlowableTextViewActivity extends Activity {
+      flowableText.setCurrentColumn(col2)
+      flowableText.size() should be(2)
 
-  override def onCreate(b: Bundle) {
-    super.onCreate(b)
-
-    val ctl = new ColumnTextLayout(ipsum, new TextView(this).getPaint)
-
-    val rl = new RelativeLayout(this)
-
-    val f1 = new FlowableTextView(this)
-    f1.setOriginalText(ipsum)
-    f1.setBackgroundColor(Color.RED)
-    f1.setLayout(ctl)
-    f1.setHeight(200)
-    f1.setRoot(true)
-
-    val f2 = new FlowableTextView(this)
-    f2.setRoot(false)
-    f2.setBackgroundColor(Color.GREEN)
-    f1.setNextFlowableTextView(f2)
-
-    val f3 = new FlowableTextView(this)
-    f3.setBackgroundColor(Color.CYAN)
-    f2.setNextFlowableTextView(f3)
-
-    val lp3 = new RelativeLayout.LayoutParams(500, 250)
-    lp3.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-    f3.setLayoutParams(lp3)
-
-    val lp1 = new RelativeLayout.LayoutParams(200, 250)
-    lp1.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-    f1.setLayoutParams(lp1)
-
-
-    val lp = new RelativeLayout.LayoutParams(200, 100)
-    lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-    f2.setLayoutParams(lp)
-
-    rl.addView(f3)
-    rl.addView(f1)
-    rl.addView(f2)
-
-    f3.setOnClickListener(oc)
-    f2.setOnClickListener(oc)
-    f1.setOnClickListener(oc)
-
-    setContentView(rl)
-
-  }
-
-  val oc = new OnClickListener {
-    def onClick(p1: View) {
-      val lp = p1.getLayoutParams
-      lp.height *= 2
-      p1.setLayoutParams(lp)
-      p1.invalidate()
+      flowableText.next(50, 20).getText should be(col3.getText)
     }
   }
-
-
-  def rl = {
-    val rl = new RelativeLayout(this)
-  }
-
   lazy val ipsum =
     """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in adipiscing sapien. Nunc id diam nec purus dictum pretium. Proin pharetra tempor nisi eget fringilla. Phasellus sollicitudin lorem eu odio dictum tincidunt. Nunc vel est vitae elit vulputate congue nec in mauris. In leo metus, varius in sollicitudin eu, egestas vel mi. Maecenas semper pellentesque felis vitae rhoncus. Sed ultricies ornare nunc ac ultrices. Sed tincidunt, nulla sit amet porta feugiat, enim libero euismod massa, quis lobortis diam sem sed ante. Donec ultricies lacus quis diam euismod mollis.
     |Curabitur at dolor nulla. Proin dui turpis, sodales ac facilisis vel, vestibulum ac dui. Etiam varius sagittis dolor, semper aliquam arcu dictum sed. Sed in nibh at urna posuere interdum in eget nulla. Maecenas vulputate magna eget eros euismod nec venenatis mi bibendum. Nullam non imperdiet quam. Vivamus aliquam tincidunt turpis, in euismod risus adipiscing in.

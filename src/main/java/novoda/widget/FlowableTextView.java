@@ -1,7 +1,6 @@
 package novoda.widget;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.TextView;
@@ -71,21 +70,15 @@ public class FlowableTextView extends TextView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-        int layoutParamHeight = getLayoutParams().height;
-        int layoutParamWidth = getLayoutParams().width;
-
-        int viewHeight = (layoutParamHeight < height) ? layoutParamHeight : height;
-        int viewWidth = (layoutParamWidth < width) ? layoutParamWidth : width;
-
-        int textHeight = getLayoutHeight(viewHeight);
-        int textWidth = getLayoutWidth(viewWidth);
-
-        if (!isUpToDate(textWidth, textHeight) && isRoot()) {
-            Log.i("TEST", "=====================================");
-            layout = new ColumnTextLayout(originalText, getPaint());
+        int mode = MeasureSpec.getMode(heightMeasureSpec);
+        if (mode == MeasureSpec.AT_MOST) {
+            setMeasuredDimension(
+                    resolveSizeAndState(width, widthMeasureSpec, 0),
+                    resolveSizeAndState(height, heightMeasureSpec, 0)
+            );
+        } else {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
-        setTextWithinLayout(textWidth, textHeight);
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     private void setTextWithinLayout(int textWidth, int textHeight) {

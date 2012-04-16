@@ -4,7 +4,6 @@ import android.graphics.Rect;
 import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
 
 import java.util.Stack;
 
@@ -95,13 +94,13 @@ public class ColumnTextLayout {
     }
 
     synchronized public void setCurrentColumn(Column column) {
-        int index = columns.indexOf(column);
-        int size = columns.size();
-        int removeNb = size - index;
-        if (removeNb > 0) {
-            for (int i = 0; i < removeNb; i++) {
-                columns.remove(index + i);
+        if (!columns.isEmpty()) {
+            while (columns.pop() != column) {
+                if (columns.empty()) {
+                    break;
+                }
             }
         }
+        columns.push(column);
     }
 }

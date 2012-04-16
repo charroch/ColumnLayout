@@ -1,13 +1,12 @@
 package org.scalatest.tools
 
-import android.app.Instrumentation
 import org.scalatest._
 import dalvik.system.DexFile
 import java.io.File
 import android.os.{Looper, Bundle}
 import android.test.{AndroidTestCase, InstrumentationTestCase}
-import android.content.Context
 import scala.collection.JavaConversions._
+import android.app.{Activity, Instrumentation}
 
 
 class SpecRunner extends SpecRunnerComponent with DefaultInstrumentationReporter
@@ -29,7 +28,13 @@ abstract class SpecRunnerComponent extends Instrumentation with InstrumentationR
       .map(injectContext)
       .map(injectInstrumentation)
       .foreach(run)
-    finish(1, new Bundle())
+
+    finish(Activity.RESULT_OK, new Bundle())
+  }
+
+  override def onException(obj: Object, e: Throwable) = {
+    println("TEST ecetion " + e)
+    super.onException(obj, e)
   }
 
   def run(s: Suite) {
@@ -57,13 +62,11 @@ abstract class SpecRunnerComponent extends Instrumentation with InstrumentationR
 
   def injectContext(s: Suite) = {
     if (classOf[AndroidTestCase].isAssignableFrom(s.getClass)) {
-      s.asInstanceOf[ {
-        def setContext(c: Context): Unit
-      }].setContext(this.getTargetContext)
-
-      s.asInstanceOf[ {
-        def setTestContext(c: Context): Unit
-      }].setTestContext(this.getTargetContext)
+      s.asInstanceOf[AndroidTestCase].setContext(this.getTargetContext)
+      //
+      //      s.asInstanceOf[ {
+      //        def setTestContext(c: Context): Unit
+      //      }].setTestContext(this.getTargetContext)
     }
     s
   }
