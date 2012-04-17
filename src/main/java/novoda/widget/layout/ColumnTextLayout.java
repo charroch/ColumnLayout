@@ -45,6 +45,20 @@ public class ColumnTextLayout {
         return column;
     }
 
+    synchronized public Column next(int width, int height, TextPaint paint) {
+        int firstCharPosition = getFirstChar();
+        int lastLine = getLastLine(width, height);
+        int nbChar = getLastChar(lastLine, width);
+        StaticLayout columnLayout = new StaticLayout(
+                text.subSequence(firstCharPosition, firstCharPosition + nbChar),
+                paint,
+                width,
+                Alignment.ALIGN_NORMAL, 1, 1, true);
+        Column column = new Column(columnLayout, firstCharPosition, columns.size());
+        columns.push(column);
+        return column;
+    }
+
     public int getTextHeight() {
         Rect r = new Rect();
         textPaint.getTextBounds("A", 0, 1, r);
@@ -99,6 +113,14 @@ public class ColumnTextLayout {
                 if (columns.empty()) {
                     break;
                 }
+            }
+        }
+    }
+
+    public void setCurrentIndex(int index) {
+        if (!columns.isEmpty()) {
+            while (columns.size() > index) {
+                columns.pop();
             }
         }
     }

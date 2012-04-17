@@ -2,7 +2,7 @@
 <novoda.widget.ColumnLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:column="http://schemas.android.com/apk/res-auto"
-        column:columnCount="2"
+        column:columnCount="5"
         column:columnWidth="200dp"
         android:id="@+id/column_layout"
         android:layout_width="fill_parent"

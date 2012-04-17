@@ -12,7 +12,7 @@ import novoda.widget.layout.ColumnTextLayout;
 
 import static android.view.View.MeasureSpec.makeMeasureSpec;
 
-public class ColumnLayout extends ViewGroup {
+public class ColumnLayout extends ViewGroup implements FlowableTextView.FlowableViewFactory {
 
     private int columnCount;
     private float columnWidth;
@@ -106,24 +106,11 @@ public class ColumnLayout extends ViewGroup {
         int columnWidth = computeColumnWidth(width);
 
         first = new Column(0, columnWidth, height, (int) getColumnGap(), getColumnMargin());
-
-//        if (getChildCount() == 0) {
-//            first.fillIn(columnTextLayout);
-//        }
-
         for (int i = 0, N = getChildCount(); i < N; i++) {
             first.measure(getChildAt(i));
         }
 
-//        if (firstRun) {
-//            first.fillIn(new ColumnTextLayout(text, getStyledTextView().getPaint()));
-//            firstRun = false;
-//        }
-
-        if (columnTextLayout != null) {
-            Log.i("TEST", "FIRST FILL IN!!!");
-            first.fillIn();
-        }
+        first.appendTextView(text);
 
         int hPadding = getPaddingLeft() + getPaddingRight();
         int vPadding = getPaddingTop() + getPaddingBottom();
@@ -263,12 +250,18 @@ public class ColumnLayout extends ViewGroup {
     public void setText(CharSequence text) {
         this.text = text;
         columnTextLayout = new ColumnTextLayout(text, getStyledTextView().getPaint());
+
         invalidate();
         requestLayout();
     }
 
     public void setPage(int page) {
         this.page = page;
+    }
+
+    @Override
+    public FlowableTextView createView(int index) {
+        return first.createView();
     }
 
     public static class LayoutParams extends MarginLayoutParams {
@@ -363,58 +356,10 @@ public class ColumnLayout extends ViewGroup {
             return getAvailableHeight() > columnTextLayout.getTextHeight();
         }
 
-        public void fillIn() {
-            if (hasSpaceForLayout()) {
-                //add view
-                FlowableTextView view = new FlowableTextView(getContext());
-                view.setLayout(columnTextLayout);
-                if (root == null) {
-                    view.setRoot(true);
-                    root = view;
-                }
-
-                LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
-                params.setColumn(index);
-                addView(view, params);
-                requestLayout();
-                Log.i("TEST", view.getMeasuredHeight() + " <===============================> " + view.getMeasuredWidth());
-
-                //view.setRoot();
-            } else {
-                getNext().fillIn();
-            }
-        }
-
-        public void fillIn(ColumnTextLayout with) {
-            if (with != null && with.hasNext()) {
-                if (hasSpaceForLayout()) {
-                    append(with);
-                } else {
-                    getNext().fillIn(with);
-                }
-            }
-        }
-
-        private void append(ColumnTextLayout with) {
-            int height = getAvailableHeight();
-            // TODO need to figure out exactly why this works...
-            height -= (this.params.topMargin + this.params.bottomMargin) * 2;
-            novoda.widget.layout.Column c = with.next(width, height);
-
-            TextView view = getStyledTextView();
-            view.setText(c.getText());
-            LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            params.setColumn(index);
-            maxColumn = index;
-            addView(view, params);
-            getNext().fillIn(with);
-        }
-
         /**
          * @return the available height for a view to draw in
          */
         public int getAvailableHeight() {
-//            return height - measuredUsedHeight - getPaddingBottom() - getPaddingTop();// - this.params.topMargin;
             return height - measuredUsedHeight - ((measuredUsedHeight == 0) ? (this.params.topMargin + this.params.bottomMargin) : 0);
         }
 
@@ -431,8 +376,8 @@ public class ColumnLayout extends ViewGroup {
                     measuredUsedHeight += this.params.bottomMargin;
                 }
 
-                if (DEBUG) android.util.Log.d(ColumnLayout.class.getSimpleName(), debugView(child)
-                        + String.format("container view with h: %d, w: %d", getMeasuredHeight(), getMeasuredWidth()));
+                if (true) android.util.Log.d(ColumnLayout.class.getSimpleName(), child
+                        + String.format(" container view with h: %d, w: %d", getMeasuredHeight(), getMeasuredWidth()));
 
                 int spannedWidth = width * params.columnsSpan + (params.columnsSpan - 1) * gap;
 
@@ -449,7 +394,7 @@ public class ColumnLayout extends ViewGroup {
                 int childHeightSpec = getChildMeasureSpec(MeasureSpec.AT_MOST, 0, heightSpec);
 
                 if (params.height == LayoutParams.FILL_PARENT) {
-                    childHeightSpec = getChildMeasureSpec(MeasureSpec.UNSPECIFIED, 0, heightSpec);
+                    //childHeightSpec = getChildMeasureSpec(MeasureSpec.UNSPECIFIED, 0, heightSpec);
                 }
 
                 child.measure(childWidthSpec, childHeightSpec);
@@ -588,18 +533,6 @@ public class ColumnLayout extends ViewGroup {
             return next;
         }
 
-        private int getPotentialRightPadding() {
-            return getPaddingRight() * index / columnCount;
-        }
-
-        public int getComputedWith(int initialWidth) {
-            if (next != null) {
-                return next.getComputedWith(width + initialWidth);
-            } else {
-                return width + initialWidth;
-            }
-        }
-
         public int getComputedColumnCount() {
             if (next != null) {
                 return next.getComputedColumnCount();
@@ -666,27 +599,26 @@ public class ColumnLayout extends ViewGroup {
             return false;
         }
 
-        @Override
-        public String toString() {
-            return "Column{" +
-                    "index=" + index +
-                    ", width=" + width +
-                    ", height=" + height +
-                    ", gap=" + gap +
-                    ", params=" + params +
-                    ", measuredUsedHeight=" + measuredUsedHeight +
-                    ", layoutCurrentBottom=" + layoutCurrentBottom +
-                    ", offsetTop=" + offsetTop +
-                    ", offsetBottom=" + offsetBottom +
-                    ", currentTop=" + currentTop +
-                    ", filled=" + filled +
-                    ", next=" + next +
-                    ", isTopOnPage=" + isTopOnPage +
-                    '}';
+        public FlowableTextView createView() {
+            if (hasSpaceForLayout()) {
+                Log.i("TEST", this.index + " <=============> " + this.getAvailableHeight());
+                FlowableTextView view = new FlowableTextView(getContext());
+                view.setText(text);
+                LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                params.setColumn(index);
+                addView(view, params);
+                return view;
+            } else {
+                return getNext().createView();
+            }
         }
-    }
 
-    private int getPageMarginRight() {
-        return -1;
+        public void appendTextView(CharSequence text) {
+            FlowableTextView view = new FlowableTextView(getContext());
+            view.setFlowableText(text);
+            view.setFlowableViewFactory(ColumnLayout.this);
+            LayoutParams params = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+            addView(view, params);
+        }
     }
 }

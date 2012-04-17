@@ -40,7 +40,7 @@ object AndroidBuild extends Build {
   lazy val tests = Project(
     "tests",
     file("src/it"),
-    settings = General.settings ++ AndroidTest.androidSettings ++ AndroidTest.settings ++ Seq(
+    settings = General.fullAndroidSettings ++ Seq(
       useProguard in Android := false,
       libraryDependencies ++= Seq(
         "org.scalatest" %% "scalatest" % "1.8-SNAPSHOT",

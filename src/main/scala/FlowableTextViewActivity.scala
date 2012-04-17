@@ -21,14 +21,14 @@ class FlowableTextViewActivity extends Activity {
     val rl = new RelativeLayout(this)
 
     val f1 = new FlowableTextView(this)
-    f1.setOriginalText(ipsum)
+    f1.setFlowableText(ipsum)
     f1.setBackgroundColor(Color.RED)
-    f1.setLayout(ctl)
+   // f1.setLayout(ctl)
     f1.setHeight(200)
-    f1.setRoot(true)
+    //f1.setRoot(true)
 
     val f2 = new FlowableTextView(this)
-    f2.setRoot(false)
+    //f2.setRoot(false)
     f2.setBackgroundColor(Color.GREEN)
     f1.setNextFlowableTextView(f2)
 
