@@ -8,47 +8,16 @@ import novoda.widget.layout.Column;
 import novoda.widget.layout.ColumnTextLayout;
 
 public class FlowableTextView extends TextView {
-
     FlowableTextView root;
     FlowableTextView next;
-
-    public CharSequence getOriginalText() {
-        return originalText;
-    }
-
-    public void setOriginalText(CharSequence originalText) {
-        this.originalText = originalText;
-    }
-
+    CharSequence fluidText;
     CharSequence originalText;
     CharSequence laidText;
-
-    FlowableViewFactory factory;
-
     private ColumnTextLayout layout;
-
     int textComputedWidth;
     int textComputedHeight;
-
     private Column column;
-
-    public boolean isRoot() {
-        return isRoot;
-    }
-
-    public void setRoot(boolean root) {
-        isRoot = root;
-    }
-
     boolean isRoot;
-
-    public FlowableViewFactory getViewFactory() {
-        return factory;
-    }
-
-    public void setViewFactory(FlowableViewFactory factory) {
-        this.factory = factory;
-    }
 
     public FlowableTextView(Context context) {
         this(context, null);
@@ -60,10 +29,6 @@ public class FlowableTextView extends TextView {
 
     public FlowableTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    }
-
-    public void requestLayout() {
-        super.requestLayout();
     }
 
     @Override
@@ -107,37 +72,29 @@ public class FlowableTextView extends TextView {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        Log.i("TEST", "WIDTH: " + w + " HEIGHT: " + h + " OLD W " + oldw + " oldh " + oldh);
+        super.onSizeChanged(w, h, oldw, oldh);
         textComputedWidth = getLayoutWidth(w);
         textComputedHeight = getLayoutHeight(h);
-        layout.setCurrentColumn(column);
-
-        if (next != null) {
-            next.onPreviousTextChange(layout);
-        }
-        super.onSizeChanged(w, h, oldw, oldh);
+        layText();
     }
 
-    protected void onPreviousTextChange(ColumnTextLayout layout) {
+    private boolean hasNext() {
+        return next != null;
+    }
+
+    private ColumnTextLayout getFlowableText() {
+        return getRoot().layout;
+    }
+
+
+    protected void layText() {
+        ColumnTextLayout layout = getFlowableText();
+        layout.setCurrentColumn(column);
         column = layout.next(textComputedWidth, textComputedHeight);
         setText(column.getText());
-        if (next != null) {
-            next.onPreviousTextChange(layout);
+        if (hasNext()) {
+            next.layText();
         }
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        int viewWidth = right - left;
-        int viewHeight = bottom - top;
-        int layoutWidth = getLayoutWidth(viewWidth);
-        int layoutHeight = getLayoutHeight(viewHeight);
-        //setText(layout.next(layoutWidth, layoutHeight).getText());
-        super.onLayout(changed, left, top, right, bottom);
-        if (isUpToDate(layoutWidth, layoutHeight)) {
-            Log.i("TEST", "UP TO DATE");
-        }
-        requestLayout();
     }
 
     private int getLayoutHeight(int height) {
@@ -168,7 +125,7 @@ public class FlowableTextView extends TextView {
     }
 
     public FlowableTextView getRoot() {
-        if (isRoot()) {
+        if (isRoot) {
             return this;
         } else {
             return root.getRoot();
@@ -177,15 +134,6 @@ public class FlowableTextView extends TextView {
 
     public static interface FlowableViewFactory {
         FlowableTextView createView(ColumnTextLayout layout);
-    }
-
-    @Override
-    public void invalidate() {
-        requestLayout();
-        super.invalidate();
-        if (isRoot() && next != null) {
-            next.invalidate();
-        }
     }
 }
 

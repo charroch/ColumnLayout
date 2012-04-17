@@ -4,7 +4,6 @@ import android.graphics.Rect;
 import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
 
 import java.util.Stack;
 
@@ -41,7 +40,7 @@ public class ColumnTextLayout {
                 textPaint,
                 width,
                 Alignment.ALIGN_NORMAL, 1, 1, true);
-        Column column = new Column(columnLayout, firstCharPosition);
+        Column column = new Column(columnLayout, firstCharPosition, columns.size());
         columns.push(column);
         return column;
     }
@@ -102,6 +101,5 @@ public class ColumnTextLayout {
                 }
             }
         }
-        columns.push(column);
     }
 }

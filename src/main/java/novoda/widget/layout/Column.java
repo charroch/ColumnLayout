@@ -9,10 +9,12 @@ public class Column {
      */
     private final int charStart;
     private final Layout layout;
+    private final int index;
 
-    public Column(Layout layout, int charStart) {
+    public Column(Layout layout, int charStart, int index) {
         this.layout = layout;
         this.charStart = charStart;
+        this.index = index;
     }
 
     public int getLineCount() {
